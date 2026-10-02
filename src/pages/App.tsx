@@ -8,8 +8,8 @@ import { catalog } from "../data/parts";
 import { useAppSelector } from "../store/hooks";
 import type { PartType } from "../types/maintenance";
 import { usePreferences } from "../preferences";
-import { useTranslation } from "../langsDict";
-// @ts-expect-error - CSS imports are handled by the bundler; type declarations are not configured in this project.
+import { isLocaleType, localeOptions, useTranslation } from "../langsDict";
+// @ts-ignore CSS side-effect imports are handled by the bundler.
 import "./styles/App.css";
 
 function addMonths(date: Date, months: number) {
@@ -115,16 +115,22 @@ function App() {
           >
             <Icon name={theme === "dark" ? "sun" : "moon"} size={16} />
           </button>
-          <button
+          <select
             className="preference-button language-button"
-            type="button"
-            aria-label={
-              locale === "en" ? t("switchToPortuguese") : t("switchToEnglish")
-            }
-            onClick={() => setLocale(locale === "en" ? "pt-BR" : "en")}
+            aria-label={t("language")}
+            value={locale}
+            onChange={(event) => {
+              if (isLocaleType(event.target.value)) {
+                setLocale(event.target.value);
+              }
+            }}
           >
-            {locale === "en" ? "PT-BR" : "EN"}
-          </button>
+            {localeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
           <a className="topbar-link" href="#how-it-works">
             {t("howItWorks")} <Icon name="arrow" size={15} />
           </a>

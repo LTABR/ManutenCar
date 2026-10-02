@@ -57,7 +57,7 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
           <h2>{t("maintenanceOutlook")}</h2>
           <p>
             <Icon name="car" size={15} /> {formatNumber(cars.length)}{" "}
-            {cars.length === 1 ? t("car") : t("cars")} {t("inYourGarage")}
+            {cars.length === 1 ? t("car").toLowerCase() : t("cars").toLowerCase()} {t("inYourGarage")}
           </p>
         </div>
         <span className="schedule-spark">

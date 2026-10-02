@@ -127,7 +127,7 @@ export function YourGarage() {
             value={activeCar?.model ?? ""}
             onChange={(event) => dispatch(setModel(event.target.value))}
           >
-            <option value="">{t("chooseCarModel")}</option>
+            <option value="" hidden>{t("chooseCarModel")}</option>
             {carModels.map((car) => (
               <option key={car} value={car}>
                 {car === "Other / not listed" ? t("otherNotListed") : car}
@@ -207,7 +207,7 @@ export function YourGarage() {
             onChange={(event) => dispatch(setSelectedPart(event.target.value))}
             disabled={addableParts.length === 0}
           >
-            <option value="">
+            <option value="" hidden>
               {addableParts.length === 0
                 ? t("allPartsAdded")
                 : t("addPartToPlan")}

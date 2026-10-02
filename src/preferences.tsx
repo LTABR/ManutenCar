@@ -6,7 +6,11 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import type { LocaleType } from "./langsDict";
+import {
+  isLocaleType,
+  localeMetadata,
+  type LocaleType,
+} from "./langsDict";
 
 export type ThemeType = "light" | "dark";
 
@@ -21,7 +25,7 @@ const PreferencesContext = createContext<PreferencesType | null>(null);
 
 function storedLocale(): LocaleType {
   const value = localStorage.getItem("manutencar-locale");
-  return value === "pt-BR" ? "pt-BR" : "en";
+  return isLocaleType(value) ? value : "en";
 }
 
 function storedTheme(): ThemeType {
@@ -35,17 +39,12 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     localStorage.setItem("manutencar-locale", locale);
     document.documentElement.lang = locale;
-    document.title =
-      locale === "pt-BR"
-        ? "ManutenCar — Cuidado com o carro sem complicação"
-        : "ManutenCar — Car care, made simple";
+    document.title = localeMetadata[locale].documentTitle;
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute(
         "content",
-        locale === "pt-BR"
-          ? "Um plano pessoal para manter a manutenção do seu carro em dia."
-          : "A personal plan for staying ahead of your car maintenance.",
+        localeMetadata[locale].documentDescription,
       );
   }, [locale]);
 

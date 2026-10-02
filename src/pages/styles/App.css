@@ -168,6 +168,11 @@ select:focus-visible {
   color: var(--green);
 }
 
+.language-button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
 .topbar-link svg {
   color: var(--green);
 }
