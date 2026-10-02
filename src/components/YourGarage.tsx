@@ -12,7 +12,8 @@ import {
   updatePartDate,
 } from "../store/maintenanceSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import type { FrequencyType } from "../types/maintenance";
+import type { CarType, FrequencyType } from "../types/maintenance";
+import { garageApi } from "../api/garage";
 import { useTranslation } from "../langsDict";
 import { Icon } from "./Icon";
 import {
@@ -55,33 +56,45 @@ export function YourGarage() {
     (part) => !parts.some((tracked) => tracked.partId === part.id),
   );
 
-  function handleAddCar() {
-    dispatch(
-      addCar({
-        id: `car-${Date.now()}-${cars.length}`,
+  async function handleAddCar() {
+    try {
+      const car = await garageApi.createCar({
         model: "",
         distance: "250",
         frequency: "week",
         parts: [],
-      }),
-    );
+      } as Omit<CarType, "id">);
+      dispatch(addCar(car));
+    } catch {
+      // Keep the planner usable while the backend is being configured.
+      dispatch(
+        addCar({
+          id: `car-${Date.now()}-${cars.length}`,
+          model: "",
+          distance: "250",
+          frequency: "week",
+          parts: [],
+        }),
+      );
+    }
   }
 
-  function handleAddPart() {
+  async function handleAddPart() {
     if (!selectedPart) {
       dispatch(setFormError("choosePartError"));
       return;
     }
-    dispatch(
-      addPart({
-        carId: activeCarId,
-        part: {
-          id: `${activeCarId}-${selectedPart}-${Date.now()}`,
-          partId: selectedPart,
-          lastServiced: getTodayString(),
-        },
-      }),
-    );
+    const localPart = {
+      id: `${activeCarId}-${selectedPart}-${Date.now()}`,
+      partId: selectedPart,
+      lastServiced: getTodayString(),
+    };
+    try {
+      const savedPart = await garageApi.addPart(activeCarId, localPart);
+      dispatch(addPart({ carId: activeCarId, part: savedPart }));
+    } catch {
+      dispatch(addPart({ carId: activeCarId, part: localPart }));
+    }
   }
 
   return (
@@ -126,6 +139,11 @@ export function YourGarage() {
             id="car-model"
             value={activeCar?.model ?? ""}
             onChange={(event) => dispatch(setModel(event.target.value))}
+            onBlur={() => {
+              void garageApi
+                .updateCar(activeCarId, { model: activeCar?.model ?? "" })
+                .catch(() => undefined);
+            }}
           >
             <option value="" hidden>{t("chooseCarModel")}</option>
             {carModels.map((car) => (
@@ -160,6 +178,14 @@ export function YourGarage() {
               inputMode="numeric"
               value={activeCar?.distance ?? ""}
               onChange={(event) => dispatch(setDistance(event.target.value))}
+              onBlur={() => {
+                void garageApi
+                  .updateCar(activeCarId, {
+                    distance: activeCar?.distance ?? "",
+                    frequency: activeCar?.frequency ?? "week",
+                  })
+                  .catch(() => undefined);
+              }}
               aria-label={t("averageDistance")}
             />
             <span>km</span>
@@ -172,6 +198,14 @@ export function YourGarage() {
               onChange={(event) =>
                 dispatch(setFrequency(event.target.value as FrequencyType))
               }
+              onBlur={() => {
+                void garageApi
+                  .updateCar(activeCarId, {
+                    distance: activeCar?.distance ?? "",
+                    frequency: activeCar?.frequency ?? "week",
+                  })
+                  .catch(() => undefined);
+              }}
             >
               <option value="week">{t("week")}</option>
               <option value="month">{t("month")}</option>
@@ -269,22 +303,30 @@ export function YourGarage() {
                   max={getTodayString()}
                   value={tracked.lastServiced}
                   onChange={(event) => {
-                    if (event.target.value)
+                    if (event.target.value) {
+                      const lastServiced = event.target.value;
                       dispatch(
                         updatePartDate({
                           carId: activeCarId,
                           id: tracked.id,
-                          lastServiced: event.target.value,
+                          lastServiced,
                         }),
                       );
+                      void garageApi
+                        .updatePart(activeCarId, tracked.id, { lastServiced })
+                        .catch(() => undefined);
+                    }
                   }}
                 />
                 <IconButton
                   className="remove-button"
                   type="button"
-                  onClick={() =>
-                    dispatch(removePart({ carId: activeCarId, id: tracked.id }))
-                  }
+                  onClick={() => {
+                    void garageApi
+                      .deletePart(activeCarId, tracked.id)
+                      .catch(() => undefined);
+                    dispatch(removePart({ carId: activeCarId, id: tracked.id }));
+                  }}
                   aria-label={interpolate(t("removePart"), {
                     part: partName(part.id, part.name),
                   })}

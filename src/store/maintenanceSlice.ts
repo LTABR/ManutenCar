@@ -25,6 +25,12 @@ const maintenanceSlice = createSlice({
   name: "maintenance",
   initialState,
   reducers: {
+    replaceCars(state, action: PayloadAction<CarType[]>) {
+      state.cars = action.payload;
+      state.activeCarId = action.payload[0]?.id ?? "";
+      state.selectedPart = "";
+      state.formError = "";
+    },
     addCar(state, action: PayloadAction<CarType>) {
       state.cars.push(action.payload);
       state.activeCarId = action.payload.id;
@@ -98,6 +104,7 @@ export const {
   setModel,
   setSelectedPart,
   updatePartDate,
+  replaceCars,
 } = maintenanceSlice.actions;
 
 export default maintenanceSlice.reducer;

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Icon } from "../components/Icon";
 import { LookingAhead } from "../components/LookingAhead";
 import type { ScheduledItemType } from "../components/LookingAhead";
@@ -6,9 +6,14 @@ import { SectionKicker } from "../components/styles/sharedStyles";
 import { YourGarage } from "../components/YourGarage";
 import { catalog } from "../data/parts";
 import { useAppSelector } from "../store/hooks";
+import { useAppDispatch } from "../store/hooks";
+import { replaceCars } from "../store/maintenanceSlice";
+import { garageApi } from "../api/garage";
 import type { PartType } from "../types/maintenance";
 import { usePreferences } from "../preferences";
 import { isLocaleType, localeOptions, useTranslation } from "../langsDict";
+import { useAuth } from "../auth";
+import { Login } from "./Login";
 // @ts-ignore CSS side-effect imports are handled by the bundler.
 import "./styles/App.css";
 
@@ -36,8 +41,29 @@ function calendarDaysFromNow(date: Date) {
 
 function App() {
   const cars = useAppSelector((state) => state.maintenance.cars);
+  const dispatch = useAppDispatch();
   const { theme, setTheme, locale, setLocale } = usePreferences();
   const { t } = useTranslation();
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      dispatch(replaceCars([]));
+      return;
+    }
+    let cancelled = false;
+    garageApi
+      .listCars()
+      .then((loadedCars) => {
+        if (!cancelled) dispatch(replaceCars(loadedCars));
+      })
+      .catch(() => {
+        // Keep the local planner usable while an API is being configured.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, user]);
 
   const scheduled = useMemo<ScheduledItemType[]>(
     () =>
@@ -91,6 +117,8 @@ function App() {
     [cars],
   );
 
+  if (!user) return <Login />;
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -134,6 +162,9 @@ function App() {
           <a className="topbar-link" href="#how-it-works">
             {t("howItWorks")} <Icon name="arrow" size={15} />
           </a>
+          <button className="logout-button" type="button" onClick={logout}>
+            <span>{user.name}</span><Icon name="logout" size={15} />
+          </button>
         </div>
       </header>
 
