@@ -2,6 +2,16 @@ from datetime import date
 from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
+class UserCreate(BaseModel):
+    email: str
+    password: str
+
+class EmailRequest(BaseModel):
+    email: str
+
+class TokenConfirm(BaseModel):
+    token: str
+
 class EncryptedLogin(BaseModel):
     algorithm: str = Field(pattern=r"^RSA-OAEP-256\+A256GCM$")
     encryptedKey: str
