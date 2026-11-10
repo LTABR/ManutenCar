@@ -16,6 +16,13 @@ from .schemas import (
     UserResponse,
 )
 from .security import create_access_token, decrypt_login_payload, get_current_user, verify_password
+import smtplib
+from email.mime.text import MIMEText
+import jwt
+from datetime import datetime, timedelta
+from .config import get_settings
+from .schemas import UserCreate, EmailRequest, TokenConfirm
+from .security import get_password_hash
 
 router = APIRouter()
 
@@ -135,3 +142,73 @@ def delete_part(car_id: str, part_id: str, user: User = Depends(get_current_user
     if part:
         db.delete(part)
     db.commit()
+
+def send_email(receiver: str, subject: str, body: str):
+    sender = "suporte.manutencar@gmail.com"
+    password_app = "sua_senha_de_app_do_gmail" # move pro o get_settings() depois
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = receiver
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender, password_app)
+            server.sendmail(sender, receiver, msg.as_string())
+    except Exception as e:
+        print(f"Erro ao enviar e-mail: {e}")
+
+# CADASTRO
+@router.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def register(payload: UserCreate, db: Session = Depends(get_db)):
+    user_exists = db.scalar(select(User).where(User.email == payload.email))
+    if user_exists:
+        raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+    
+    new_user = User(
+        id=str(uuid4()),
+        email=payload.email,
+        password_hash=get_password_hash(payload.password)
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return user_response(new_user)
+
+# RECUPERAÇÃO DE ACESSO
+@router.post("/auth/recover")
+def recover_password(payload: EmailRequest, db: Session = Depends(get_db)):
+    user = db.scalar(select(User).where(User.email == payload.email))
+    if user:
+        settings = get_settings()
+        token = jwt.encode({"sub": user.email, "exp": datetime.utcnow() + timedelta(minutes=15)}, settings.jwt_secret, algorithm="HS256")
+        link = f"https://manutencar.com.br/redefinir?token={token}"
+        enviar_email(user.email, "ManutenCar - Redefinição", f"Link: {link}")
+    return {"message": "Se o e-mail existir, um link foi enviado."}
+
+# SOLICITAÇÃO DE EXCLUSÃO LGPD
+@router.post("/auth/delete-request")
+def request_deletion(user: User = Depends(get_current_user)):
+    settings = get_settings()
+    token = jwt.encode({"sub": user.email, "action": "delete", "exp": datetime.utcnow() + timedelta(minutes=15)}, settings.jwt_secret, algorithm="HS256")
+    link = f"https://manutencar.com.br/excluir?token={token}"
+    enviar_email(user.email, "ManutenCar - Confirmação de Exclusão", f"Confirme a exclusão irreversível (LGPD): {link}")
+    return {"message": "E-mail de validação enviado."}
+
+# CONFIRMAÇÃO DE EXCLUSÃO LGPD
+@router.post("/auth/delete-confirm")
+def confirm_deletion(payload: TokenConfirm, db: Session = Depends(get_db)):
+    settings = get_settings()
+    try:
+        decoded = jwt.decode(payload.token, settings.jwt_secret, algorithms=["HS256"])
+        if decoded.get("action") != "delete":
+            raise ValueError()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Token inválido ou expirado")
+    
+    user = db.scalar(select(User).where(User.email == decoded["sub"]))
+    if user:
+        # remove e-mail e senha, inativa o acesso
+        user.email = f"deleted_{user.id}@manutencar.local"
+        user.password_hash = "deleted"
+        db.commit()
+    return {"message": "Conta removida segundo a LGPD."}
