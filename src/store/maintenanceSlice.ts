@@ -37,6 +37,17 @@ const maintenanceSlice = createSlice({
       state.selectedPart = "";
       state.formError = "";
     },
+    removeCar(state, action: PayloadAction<string>) {
+      const carIndex = state.cars.findIndex((car) => car.id === action.payload);
+      if (carIndex < 0) return;
+      state.cars.splice(carIndex, 1);
+      state.activeCarId =
+        state.activeCarId === action.payload
+          ? state.cars[Math.min(carIndex, state.cars.length - 1)]?.id ?? ""
+          : state.activeCarId;
+      state.selectedPart = "";
+      state.formError = "";
+    },
     selectCar(state, action: PayloadAction<string>) {
       if (state.cars.some((car) => car.id === action.payload)) {
         state.activeCarId = action.payload;
@@ -97,6 +108,7 @@ export const {
   addCar,
   addPart,
   removePart,
+  removeCar,
   selectCar,
   setDistance,
   setFormError,

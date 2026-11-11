@@ -37,7 +37,9 @@ export async function apiRequest<T>(
     const message =
       body && typeof body === "object" && "message" in body && typeof body.message === "string"
         ? body.message
-        : "The server could not complete this request.";
+        : body && typeof body === "object" && "detail" in body && typeof body.detail === "string"
+          ? body.detail
+          : "The server could not complete this request.";
     throw new ApiError(message, response.status);
   }
   return body as T;

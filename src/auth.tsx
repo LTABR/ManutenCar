@@ -12,6 +12,7 @@ import type { AuthUser } from "./api/auth";
 type AuthContextType = {
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -25,12 +26,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setUser(authenticatedUser);
   }, []);
 
+  const signUp = useCallback(async (email: string, password: string) => {
+    const authenticatedUser = await authApi.signUp(email, password);
+    setUser(authenticatedUser);
+  }, []);
+
   const logout = useCallback(() => {
     authApi.logout();
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, login, logout }), [user, login, logout]);
+  const value = useMemo(() => ({ user, login, signUp, logout }), [user, login, signUp, logout]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

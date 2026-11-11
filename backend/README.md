@@ -11,6 +11,8 @@ This backend uses FastAPI, SQLAlchemy, and MySQL. It is compatible with the fron
 5. Create a user: `python backend/scripts/create_user.py you@example.com 'a-long-password'`.
 6. Run: `uvicorn app.main:app --app-dir backend --reload`.
 
-The API is mounted at `/api`; login is `POST /api/auth/login`. The encrypted body is hybrid RSA-OAEP-256 + AES-256-GCM (`algorithm`, `encryptedKey`, `iv`, `ciphertext`).
+The API is mounted at `/api`; registration is `POST /api/auth/register` and login is `POST /api/auth/login`. Both endpoints accept an encrypted body using hybrid RSA-OAEP-256 + AES-256-GCM (`algorithm`, `encryptedKey`, `iv`, `ciphertext`). Registration creates the user and returns an access token and user profile.
+
+Tracked parts are created with `POST /api/cars/{car_id}/parts`; the server assigns each part its ID and persists both the part and its car association. `DELETE /api/cars/{car_id}/parts/{part_id}` removes a tracked part, and `DELETE /api/cars/{car_id}` removes the car and any parts no longer referenced by another car.
 
 `owners_ids` and `parts_ids` are JSON ID arrays as requested. For larger deployments, replace the JSON ownership/parts arrays with junction tables and add Alembic migrations.

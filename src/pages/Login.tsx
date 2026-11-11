@@ -4,27 +4,45 @@ import { Icon } from "../components/Icon";
 import { useAuth } from "../auth";
 
 export function Login() {
-  const { login } = useAuth();
+  const { login, signUp } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    if (isSignUp && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await login(email.trim(), password);
+      if (isSignUp) {
+        await signUp(email.trim(), password);
+      } else {
+        await login(email.trim(), password);
+      }
     } catch (caught) {
       setError(
         caught instanceof ApiError || caught instanceof Error
           ? caught.message
-          : "Unable to sign in. Please try again.",
+          : `Unable to ${isSignUp ? "create your account" : "sign in"}. Please try again.`,
       );
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function toggleMode() {
+    setIsSignUp((current) => !current);
+    setPassword("");
+    setConfirmPassword("");
+    setError("");
   }
 
   return (
@@ -36,9 +54,9 @@ export function Login() {
         </a>
         <div className="login-heading">
           <span className="login-security-icon"><Icon name="lock" size={20} /></span>
-          <p>WELCOME BACK</p>
-          <h1 id="login-title">Your garage is waiting.</h1>
-          <span>Sign in to keep every service on track.</span>
+          <p>{isSignUp ? "GET STARTED" : "WELCOME BACK"}</p>
+          <h1 id="login-title">{isSignUp ? "Create your account." : "Your garage is waiting."}</h1>
+          <span>{isSignUp ? "Sign up to keep every service on track." : "Sign in to keep every service on track."}</span>
         </div>
         <form className="login-form" onSubmit={submit}>
           <label>
@@ -56,19 +74,42 @@ export function Login() {
             Password
             <input
               type="password"
-              autoComplete="current-password"
+              autoComplete={isSignUp ? "new-password" : "current-password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter your password"
+              placeholder={isSignUp ? "Create a password" : "Enter your password"}
               minLength={8}
               required
             />
           </label>
+          {isSignUp && (
+            <label>
+              Confirm password
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                placeholder="Re-enter your password"
+                minLength={8}
+                required
+              />
+            </label>
+          )}
           {error && <p className="login-error" role="alert">{error}</p>}
           <button className="login-submit" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Signing in…" : "Sign in"} <Icon name="arrow" size={16} />
+            {isSubmitting
+              ? isSignUp ? "Creating account…" : "Signing in…"
+              : isSignUp ? "Create account" : "Sign in"}
+            <Icon name="arrow" size={16} />
           </button>
         </form>
+        <p className="login-mode-switch">
+          {isSignUp ? "Already have an account?" : "New to ManutenCar?"}{" "}
+          <button type="button" onClick={toggleMode} disabled={isSubmitting}>
+            {isSignUp ? "Sign in" : "Create an account"}
+          </button>
+        </p>
         <p className="login-security-note"><Icon name="lock" size={13} /> Credentials are encrypted before they leave this browser.</p>
       </section>
       <aside className="login-aside" aria-hidden="true">

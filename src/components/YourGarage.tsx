@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { catalog } from "../data/parts";
 import {
   addPart,
   addCar,
+  removeCar,
   removePart,
   selectCar,
   setDistance,
@@ -12,7 +14,7 @@ import {
   updatePartDate,
 } from "../store/maintenanceSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import type { CarType, FrequencyType } from "../types/maintenance";
+import type { FrequencyType } from "../types/maintenance";
 import { garageApi } from "../api/garage";
 import { useTranslation } from "../langsDict";
 import { Icon } from "./Icon";
@@ -52,30 +54,41 @@ export function YourGarage() {
   );
   const activeCar = cars.find((car) => car.id === activeCarId);
   const parts = activeCar?.parts ?? [];
+  const [isAddingCar, setIsAddingCar] = useState(false);
+  const [isAddingPart, setIsAddingPart] = useState(false);
+  const [removingCarId, setRemovingCarId] = useState<string | null>(null);
+  const [removingPartId, setRemovingPartId] = useState<string | null>(null);
   const addableParts = catalog.filter(
     (part) => !parts.some((tracked) => tracked.partId === part.id),
   );
 
   async function handleAddCar() {
+    setIsAddingCar(true);
+    dispatch(setFormError(""));
     try {
       const car = await garageApi.createCar({
         model: "",
         distance: "250",
         frequency: "week",
-        parts: [],
-      } as Omit<CarType, "id">);
+      });
       dispatch(addCar(car));
-    } catch {
-      // Keep the planner usable while the backend is being configured.
-      dispatch(
-        addCar({
-          id: `car-${Date.now()}-${cars.length}`,
-          model: "",
-          distance: "250",
-          frequency: "week",
-          parts: [],
-        }),
-      );
+    } catch (error) {
+      dispatch(setFormError(error instanceof Error ? error.message : t("addCarFailed")));
+    } finally {
+      setIsAddingCar(false);
+    }
+  }
+
+  async function handleRemoveCar(carId: string) {
+    setRemovingCarId(carId);
+    dispatch(setFormError(""));
+    try {
+      await garageApi.deleteCar(carId);
+      dispatch(removeCar(carId));
+    } catch (error) {
+      dispatch(setFormError(error instanceof Error ? error.message : t("removeCarFailed")));
+    } finally {
+      setRemovingCarId(null);
     }
   }
 
@@ -84,16 +97,33 @@ export function YourGarage() {
       dispatch(setFormError("choosePartError"));
       return;
     }
-    const localPart = {
-      id: `${activeCarId}-${selectedPart}-${Date.now()}`,
-      partId: selectedPart,
-      lastServiced: getTodayString(),
-    };
+    if (!activeCarId) return;
+    setIsAddingPart(true);
+    dispatch(setFormError(""));
     try {
-      const savedPart = await garageApi.addPart(activeCarId, localPart);
+      const savedPart = await garageApi.addPart(activeCarId, {
+        partId: selectedPart,
+        lastServiced: getTodayString(),
+      });
       dispatch(addPart({ carId: activeCarId, part: savedPart }));
-    } catch {
-      dispatch(addPart({ carId: activeCarId, part: localPart }));
+    } catch (error) {
+      dispatch(setFormError(error instanceof Error ? error.message : t("addPartFailed")));
+    } finally {
+      setIsAddingPart(false);
+    }
+  }
+
+  async function handleRemovePart(partId: string) {
+    if (!activeCarId) return;
+    setRemovingPartId(partId);
+    dispatch(setFormError(""));
+    try {
+      await garageApi.deletePart(activeCarId, partId);
+      dispatch(removePart({ carId: activeCarId, id: partId }));
+    } catch (error) {
+      dispatch(setFormError(error instanceof Error ? error.message : t("removePartFailed")));
+    } finally {
+      setRemovingPartId(null);
     }
   }
 
@@ -111,24 +141,57 @@ export function YourGarage() {
 
       <div className="garage-car-picker" aria-label={t("yourCars")}>
         {cars.map((car, index) => (
-          <button
-            className={`garage-car-tab${car.id === activeCarId ? " active" : ""}`}
+          <div
+            className={`garage-car-item${car.id === activeCarId ? " active" : ""}`}
             key={car.id}
-            type="button"
-            onClick={() => dispatch(selectCar(car.id))}
-            aria-pressed={car.id === activeCarId}
           >
-            <Icon name="car" size={15} />
-            <span>
-              {car.model
-                ? `${car.model} · ${t("car")} ${index + 1}`
-                : `${t("car")} ${index + 1}`}
-            </span>
-          </button>
+            <button
+              className={`garage-car-tab${car.id === activeCarId ? " active" : ""}`}
+              type="button"
+              onClick={() => dispatch(selectCar(car.id))}
+              aria-pressed={car.id === activeCarId}
+            >
+              <Icon name="car" size={15} />
+              <span>
+                {car.model
+                  ? `${car.model} · ${t("car")} ${index + 1}`
+                  : `${t("car")} ${index + 1}`}
+              </span>
+            </button>
+            <IconButton
+              className="remove-car-button"
+              type="button"
+              onClick={() => void handleRemoveCar(car.id)}
+              disabled={
+                removingCarId !== null ||
+                isAddingCar ||
+                isAddingPart ||
+                removingPartId !== null
+              }
+              aria-label={interpolate(t("removeCar"), {
+                car: car.model || `${t("car")} ${index + 1}`,
+              })}
+              title={interpolate(t("removeCar"), {
+                car: car.model || `${t("car")} ${index + 1}`,
+              })}
+            >
+              <Icon name="trash" size={14} />
+            </IconButton>
+          </div>
         ))}
-        <button className="garage-add-car" type="button" onClick={handleAddCar}>
+        <button
+          className="garage-add-car"
+          type="button"
+          onClick={() => void handleAddCar()}
+          disabled={
+            isAddingCar ||
+            removingCarId !== null ||
+            isAddingPart ||
+            removingPartId !== null
+          }
+        >
           <Icon name="plus" size={15} />
-          <span>{t("addCar")}</span>
+          <span>{isAddingCar ? t("addingCar") : t("addCar")}</span>
         </button>
       </div>
 
@@ -139,6 +202,7 @@ export function YourGarage() {
             id="car-model"
             value={activeCar?.model ?? ""}
             onChange={(event) => dispatch(setModel(event.target.value))}
+            disabled={!activeCar || removingCarId === activeCarId}
             onBlur={() => {
               void garageApi
                 .updateCar(activeCarId, { model: activeCar?.model ?? "" })
@@ -177,6 +241,7 @@ export function YourGarage() {
               min="1"
               inputMode="numeric"
               value={activeCar?.distance ?? ""}
+              disabled={!activeCar || removingCarId === activeCarId}
               onChange={(event) => dispatch(setDistance(event.target.value))}
               onBlur={() => {
                 void garageApi
@@ -195,6 +260,7 @@ export function YourGarage() {
             <SelectControl
               aria-label={t("drivingFrequency")}
               value={activeCar?.frequency ?? "week"}
+              disabled={!activeCar || removingCarId === activeCarId}
               onChange={(event) =>
                 dispatch(setFrequency(event.target.value as FrequencyType))
               }
@@ -239,7 +305,12 @@ export function YourGarage() {
             aria-label={t("choosePart")}
             value={selectedPart}
             onChange={(event) => dispatch(setSelectedPart(event.target.value))}
-            disabled={addableParts.length === 0}
+            disabled={
+              !activeCar ||
+              removingCarId === activeCarId ||
+              addableParts.length === 0 ||
+              isAddingPart
+            }
           >
             <option value="" hidden>
               {addableParts.length === 0
@@ -259,11 +330,16 @@ export function YourGarage() {
         <button
           className="add-button"
           type="button"
-          onClick={handleAddPart}
-          disabled={addableParts.length === 0}
+          onClick={() => void handleAddPart()}
+          disabled={
+            !activeCar ||
+            removingCarId === activeCarId ||
+            addableParts.length === 0 ||
+            isAddingPart
+          }
         >
           <Icon name="plus" size={18} />
-          <span>{t("add")}</span>
+          <span>{isAddingPart ? t("addingPart") : t("add")}</span>
         </button>
       </div>
       {formError && (
@@ -321,12 +397,8 @@ export function YourGarage() {
                 <IconButton
                   className="remove-button"
                   type="button"
-                  onClick={() => {
-                    void garageApi
-                      .deletePart(activeCarId, tracked.id)
-                      .catch(() => undefined);
-                    dispatch(removePart({ carId: activeCarId, id: tracked.id }));
-                  }}
+                  onClick={() => void handleRemovePart(tracked.id)}
+                  disabled={removingPartId !== null || removingCarId === activeCarId}
                   aria-label={interpolate(t("removePart"), {
                     part: partName(part.id, part.name),
                   })}

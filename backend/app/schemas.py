@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class EncryptedLogin(BaseModel):
+class EncryptedAuthPayload(BaseModel):
     algorithm: str = Field(pattern=r"^RSA-OAEP-256\+A256GCM$")
     encryptedKey: str
     iv: str
@@ -56,9 +56,8 @@ class CarUpdate(BaseModel):
 
 
 class PartCreate(BaseModel):
-    id: str | None = None
-    part_type_id: str | None = None
-    partId: str | None = None
+    part_type_id: str | None = Field(default=None, max_length=80)
+    partId: str | None = Field(default=None, max_length=80)
     last_maintenance: date | None = None
     lastServiced: date | None = None
 

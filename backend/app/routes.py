@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .db import get_db
@@ -10,14 +11,20 @@ from .schemas import (
     CarCreate,
     CarResponse,
     CarUpdate,
-    EncryptedLogin,
+    EncryptedAuthPayload,
     LoginResponse,
     PartCreate,
     PartResponse,
     PartUpdate,
     UserResponse,
 )
-from .security import create_access_token, decrypt_login_payload, get_current_user, verify_password
+from .security import (
+    create_access_token,
+    decrypt_auth_payload,
+    get_current_user,
+    hash_password,
+    verify_password,
+)
 
 router = APIRouter()
 
@@ -50,14 +57,48 @@ def response_car(db: Session, car: Car) -> CarResponse:
 
 
 @router.post("/auth/login", response_model=LoginResponse)
-def login(payload: EncryptedLogin, db: Session = Depends(get_db)):
+def login(payload: EncryptedAuthPayload, db: Session = Depends(get_db)):
     try:
-        credentials = decrypt_login_payload(payload.encryptedKey, payload.iv, payload.ciphertext)
+        credentials = decrypt_auth_payload(payload.encryptedKey, payload.iv, payload.ciphertext)
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid login credentials")
     user = db.scalar(select(User).where(User.email == credentials["email"]))
     if not user or not verify_password(credentials["password"], user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid login credentials")
+    return LoginResponse(accessToken=create_access_token(user.id), user=user_response(user))
+
+
+@router.post("/auth/register", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
+def register(payload: EncryptedAuthPayload, db: Session = Depends(get_db)):
+    try:
+        credentials = decrypt_auth_payload(payload.encryptedKey, payload.iv, payload.ciphertext)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid registration payload")
+    email = credentials["email"]
+    if (
+        len(email) > 320
+        or email.count("@") != 1
+        or any(character.isspace() for character in email)
+        or not all(email.split("@"))
+    ):
+        raise HTTPException(status_code=422, detail="Enter a valid email address")
+    if len(credentials["password"]) < 8:
+        raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
+    if db.scalar(select(User).where(User.email == email)):
+        raise HTTPException(status_code=409, detail="An account with this email already exists")
+
+    user = User(
+        id=str(uuid4()),
+        email=email,
+        password_hash=hash_password(credentials["password"]),
+    )
+    db.add(user)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="An account with this email already exists")
+    db.refresh(user)
     return LoginResponse(accessToken=create_access_token(user.id), user=user_response(user))
 
 
@@ -106,7 +147,18 @@ def update_car(car_id: str, payload: CarUpdate, user: User = Depends(get_current
 @router.delete("/cars/{car_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_car(car_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     car = owned_car(db, user, car_id)
+    removed_part_ids = set(car.parts_ids or [])
+    other_cars = db.scalars(select(Car).where(Car.id != car_id)).all()
+    referenced_part_ids = {
+        part_id
+        for other_car in other_cars
+        for part_id in (other_car.parts_ids or [])
+    }
     db.delete(car)
+    for part_id in removed_part_ids - referenced_part_ids:
+        part = db.get(Part, part_id)
+        if part:
+            db.delete(part)
     db.commit()
 
 
@@ -114,12 +166,28 @@ def delete_car(car_id: str, user: User = Depends(get_current_user), db: Session 
 def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     car = owned_car(db, user, car_id)
     part_type_id = payload.type_id()
-    if not part_type_id:
+    if not part_type_id or len(part_type_id) > 80:
         raise HTTPException(status_code=422, detail="part_type_id is required")
-    part = Part(id=payload.id or str(uuid4()), part_type_id=part_type_id, last_maintenance=payload.maintenance_date())
+    if any(
+        existing_part.part_type_id == part_type_id
+        for existing_part in db.scalars(
+            select(Part).where(Part.id.in_(car.parts_ids or []))
+        )
+    ):
+        raise HTTPException(status_code=409, detail="This part is already tracked for this car")
+
+    part = Part(
+        id=str(uuid4()),
+        part_type_id=part_type_id,
+        last_maintenance=payload.maintenance_date(),
+    )
     db.add(part)
     car.parts_ids = [*(car.parts_ids or []), part.id]
-    db.commit()
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     db.refresh(part)
     return part_payload(part)
 
@@ -145,6 +213,10 @@ def delete_part(car_id: str, part_id: str, user: User = Depends(get_current_user
         raise HTTPException(status_code=404, detail="Part not found")
     car.parts_ids = [value for value in car.parts_ids if value != part_id]
     part = db.get(Part, part_id)
-    if part:
+    other_cars = db.scalars(select(Car).where(Car.id != car_id)).all()
+    still_referenced = any(
+        part_id in (other_car.parts_ids or []) for other_car in other_cars
+    )
+    if part and not still_referenced:
         db.delete(part)
     db.commit()

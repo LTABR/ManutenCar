@@ -35,7 +35,7 @@ def _decode(value: str) -> bytes:
     return base64.b64decode(value, validate=True)
 
 
-def decrypt_login_payload(encrypted_key: str, iv: str, ciphertext: str) -> dict[str, str]:
+def decrypt_auth_payload(encrypted_key: str, iv: str, ciphertext: str) -> dict[str, str]:
     settings = get_settings()
     private_key = serialization.load_pem_private_key(
         Path(settings.auth_private_key_path).read_bytes(), password=None
@@ -55,7 +55,7 @@ def decrypt_login_payload(encrypted_key: str, iv: str, ciphertext: str) -> dict[
         or not isinstance(payload.get("email"), str)
         or not isinstance(payload.get("password"), str)
     ):
-        raise ValueError("Invalid login payload")
+        raise ValueError("Invalid authentication payload")
     return {"email": payload["email"].strip().lower(), "password": payload["password"]}
 
 
