@@ -99,14 +99,14 @@ Requisitos: Python v3.10 ou superior, Node.js v18 ou superior e MySQL Server
 
 1. **Clonagem do repositório:**
    ```bash
-   git clone https://github.com/Livia-Oliveira231964/ManutenCar.git
+   git clone https://github.com/LTABR/ManutenCar.git
    cd ManutenCar
    ```
 
 2. **Configuração do Back-End (Python):**
    ```bash
    cd backend
-   python -m venv venv
+   python -m venv .venv
    
    # No Linux/macOS:
    source venv/bin/activate
@@ -114,17 +114,37 @@ Requisitos: Python v3.10 ou superior, Node.js v18 ou superior e MySQL Server
    # venv\Scripts\activate
 
    pip install -r requirements.txt
-   python main.py
+   cp .env.example .env
    ```
-
-3. **Configuração do Front-End (TypeScript/React):**
+   
+   Edite `.env` com os detalhes de conexão MySQL com um `JWT_SECRET` forte. Crie um banco de dados utilizando `schema.sql`, por exemplo:
    ```bash
-   cd ../frontend
-   npm install
-   npm start
+   mysql -u root -p < schema.sql
+   ```
+   
+   Gere as chaves RSA esperadas pela configuração padrão do `.env`:
+   ```bash
+   mkdir -p secrets
+   openssl genpkey -algorithm RSA -out secrets/auth-private-key.pem -pkeyopt rsa_keygen_bits:2048
+   openssl rsa -pubout -in secrets/auth-private-key.pem -out secrets/auth-public-key.pem
+   ```
+   Ou as gere em externamente no diretório `secrets` com algum gerador de chaves RSA 2048 externo, como o [RSA Key Generator](https://cryptotools.net/rsagen).
+
+   Por fim, rode a API:
+   ```bash
+   uvicorn app.main:app --reload
    ```
 
-4. **Execução da Suíte de Testes (QA):**
+4. **Configuração do Front-End (TypeScript/React):**
+   Execute no diretório raiz em um novo terminal:
+   ```bash
+   npm install
+   cp .env.example .env
+   npm run dev
+   ```
+   Substitua `VITE_AUTH_PUBLIC_KEY` no arquivo `.env` para a chave RSA pública gerada anteriormente, tudo na mesma linha.
+
+6. **Execução da Suíte de Testes (QA):**
    ```bash
    # Testes unitários e de integração
    npm run test
