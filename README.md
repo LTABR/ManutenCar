@@ -130,10 +130,17 @@ Requisitos: Python v3.10 ou superior, Node.js v18 ou superior e MySQL Server
    ```
    Ou as gere em externamente no diretório `secrets` com algum gerador de chaves RSA 2048 externo, como o [RSA Key Generator](https://cryptotools.net/rsagen).
 
+   Se desejado, insira um usuário inicial com o script `create_user.py`:
+   ```bash
+   python scripts/create_user.py you@example.com 'a-long-password'
+   ```
+
    Por fim, rode a API:
    ```bash
    uvicorn app.main:app --reload
    ```
+
+   Ela estará disponível por padrão em `http://localhost:8000`, com a documentação em `http://localhost:8000/docs` e checagem de estabilidade em `http://localhost:8000/health`.
 
 4. **Configuração do Front-End (TypeScript/React):**
    Execute no diretório raiz em um novo terminal:
@@ -143,6 +150,8 @@ Requisitos: Python v3.10 ou superior, Node.js v18 ou superior e MySQL Server
    npm run dev
    ```
    Substitua `VITE_AUTH_PUBLIC_KEY` no arquivo `.env` para a chave RSA pública gerada anteriormente, tudo na mesma linha.
+
+   O aplicativo estará disponível em `http://localhost:5173`, por padrão.
 
 6. **Execução da Suíte de Testes (QA):**
    ```bash
