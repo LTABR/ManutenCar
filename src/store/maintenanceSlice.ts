@@ -25,9 +25,26 @@ const maintenanceSlice = createSlice({
   name: "maintenance",
   initialState,
   reducers: {
+    replaceCars(state, action: PayloadAction<CarType[]>) {
+      state.cars = action.payload;
+      state.activeCarId = action.payload[0]?.id ?? "";
+      state.selectedPart = "";
+      state.formError = "";
+    },
     addCar(state, action: PayloadAction<CarType>) {
       state.cars.push(action.payload);
       state.activeCarId = action.payload.id;
+      state.selectedPart = "";
+      state.formError = "";
+    },
+    removeCar(state, action: PayloadAction<string>) {
+      const carIndex = state.cars.findIndex((car) => car.id === action.payload);
+      if (carIndex < 0) return;
+      state.cars.splice(carIndex, 1);
+      state.activeCarId =
+        state.activeCarId === action.payload
+          ? state.cars[Math.min(carIndex, state.cars.length - 1)]?.id ?? ""
+          : state.activeCarId;
       state.selectedPart = "";
       state.formError = "";
     },
@@ -91,6 +108,7 @@ export const {
   addCar,
   addPart,
   removePart,
+  removeCar,
   selectCar,
   setDistance,
   setFormError,
@@ -98,6 +116,7 @@ export const {
   setModel,
   setSelectedPart,
   updatePartDate,
+  replaceCars,
 } = maintenanceSlice.actions;
 
 export default maintenanceSlice.reducer;

@@ -11,7 +11,9 @@ export type IconNameType =
   | "road"
   | "chevron"
   | "sun"
-  | "moon";
+  | "moon"
+  | "lock"
+  | "logout";
 
 export function Icon({
   name,
@@ -68,6 +70,18 @@ export function Icon({
       </>
     ),
     moon: <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />,
+    lock: (
+      <>
+        <rect x="4" y="10" width="16" height="11" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </>
+    ),
+    logout: (
+      <>
+        <path d="M10 17l5-5-5-5m5 5H3" />
+        <path d="M21 19V5a2 2 0 0 0-2-2h-5" />
+      </>
+    ),
   };
   return <svg {...common}>{paths[name]}</svg>;
 }

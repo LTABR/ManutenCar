@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useAppSelector } from "../store/hooks";
+import { useAppDispatch } from "../store/hooks";
+import { updatePartDate } from "../store/maintenanceSlice";
+import { garageApi } from "../api/garage";
 import type { PartType, TrackedPartType } from "../types/maintenance";
 import { Icon } from "./Icon";
 import { Card, PartMarker, SectionKicker } from "./styles/sharedStyles";
@@ -27,6 +30,9 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
   const { t, partName, formatDate, formatNumber, interpolate } =
     useTranslation();
   const cars = useAppSelector((state) => state.maintenance.cars);
+  const dispatch = useAppDispatch();
+  const [updatingPartId, setUpdatingPartId] = useState<string | null>(null);
+  const [updateErrorId, setUpdateErrorId] = useState<string | null>(null);
   const [carFilter, setCarFilter] = useState("all");
   const [partFilter, setPartFilter] = useState("all");
   const [pageSize, setPageSize] = useState(5);
@@ -48,6 +54,29 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
   const availableParts = [
     ...new Map(scheduled.map((item) => [item.partId, item.part])).values(),
   ].sort((a, b) => a.name.localeCompare(b.name));
+
+  function todayString() {
+    const today = new Date();
+    return [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0"),
+    ].join("-");
+  }
+
+  async function markMaintained(carId: string, partId: string) {
+    const lastServiced = todayString();
+    setUpdatingPartId(partId);
+    setUpdateErrorId(null);
+    try {
+      await garageApi.updatePart(carId, partId, { lastServiced });
+      dispatch(updatePartDate({ carId, id: partId, lastServiced }));
+    } catch {
+      setUpdateErrorId(partId);
+    } finally {
+      setUpdatingPartId(null);
+    }
+  }
 
   return (
     <Card as="section" className="schedule-card" aria-live="polite">
@@ -197,6 +226,26 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
                         ? t("mileageEstimate")
                         : t("timeInterval")}
                     </span>
+                  </div>
+                  <div className="schedule-maintain-action">
+                    <button
+                      type="button"
+                      className="schedule-maintain-button"
+                      onClick={() => markMaintained(carId, id)}
+                      disabled={updatingPartId === id}
+                      aria-label={interpolate(t("markMaintained"), {
+                        part: partName(part.id, part.name),
+                      })}
+                    >
+                      {updatingPartId === id
+                        ? t("updatingMaintenance")
+                        : t("markMaintained")}
+                    </button>
+                    {updateErrorId === id && (
+                      <span className="schedule-maintain-error" role="alert">
+                        {t("maintenanceUpdateFailed")}
+                      </span>
+                    )}
                   </div>
                   <details className="schedule-details">
                     <summary

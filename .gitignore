@@ -1,3 +1,15 @@
+# Dependencias e build do frontend (gerados por npm/Vite, nao versionar)
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Ambiente virtual e cache do backend Python (gerados localmente, nao versionar)
+.venv/
+__pycache__/
+*.pyc
+
+# Segredos e configuracao local (cada dev cria o seu a partir dos .env.example)
+.env
+.env.local
+backend/.env
+backend/secrets/

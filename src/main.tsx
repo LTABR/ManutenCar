@@ -4,13 +4,16 @@ import App from './pages/App'
 import { Provider } from 'react-redux'
 import { store } from './store'
 import { PreferencesProvider } from './preferences'
+import { AuthProvider } from './auth'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <PreferencesProvider>
-        <App />
-      </PreferencesProvider>
+      <AuthProvider>
+        <PreferencesProvider>
+          <App />
+        </PreferencesProvider>
+      </AuthProvider>
     </Provider>
   </React.StrictMode>,
 )
