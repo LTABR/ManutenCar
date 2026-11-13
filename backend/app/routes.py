@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .db import get_db
+from .maintenance import PART_INTERVALS
 from .models import Car, Part, User, part_payload
 from .schemas import (
     CarCreate,
@@ -52,7 +53,7 @@ def response_car(db: Session, car: Car) -> CarResponse:
         weekly_usage=weekly_usage,
         distance=str(round(weekly_usage, 2)),
         frequency="week",
-        parts=[part_payload(part) for part in parts],
+        parts=[part_payload(part, weekly_usage) for part in parts],
     )
 
 
@@ -168,6 +169,8 @@ def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_
     part_type_id = payload.type_id()
     if not part_type_id or len(part_type_id) > 80:
         raise HTTPException(status_code=422, detail="part_type_id is required")
+    if part_type_id not in PART_INTERVALS:
+        raise HTTPException(status_code=422, detail="Unknown part_type_id")
     if any(
         existing_part.part_type_id == part_type_id
         for existing_part in db.scalars(
@@ -189,7 +192,7 @@ def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_
         db.rollback()
         raise
     db.refresh(part)
-    return part_payload(part)
+    return part_payload(part, float(car.weekly_usage or 0))
 
 
 @router.patch("/cars/{car_id}/parts/{part_id}", response_model=PartResponse)
@@ -203,7 +206,7 @@ def update_part(car_id: str, part_id: str, payload: PartUpdate, user: User = Dep
     part.last_maintenance = payload.maintenance_date()
     db.commit()
     db.refresh(part)
-    return part_payload(part)
+    return part_payload(part, float(car.weekly_usage or 0))
 
 
 @router.delete("/cars/{car_id}/parts/{part_id}", status_code=status.HTTP_204_NO_CONTENT)
