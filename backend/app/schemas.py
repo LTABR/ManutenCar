@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -28,6 +28,11 @@ class PartResponse(BaseModel):
     id: str
     partId: str
     lastServiced: date
+    expiresAt: date
+    calendarDue: date
+    mileageDue: date | None
+    wearPercent: float
+    dueBy: Literal["time", "mileage"]
 
 
 class CarCreate(BaseModel):
