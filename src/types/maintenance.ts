@@ -22,6 +22,11 @@ export type TrackedPartType = {
   id: string;
   partId: string;
   lastServiced: string;
+  expiresAt: string;
+  calendarDue: string;
+  mileageDue: string | null;
+  wearPercent: number;
+  dueBy: "time" | "mileage";
 };
 
 export type FrequencyType = "week" | "month" | "year";
