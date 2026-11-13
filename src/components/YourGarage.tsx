@@ -5,13 +5,14 @@ import {
   addCar,
   removeCar,
   removePart,
+  replaceCar,
+  replacePart,
   selectCar,
   setDistance,
   setFormError,
   setFrequency,
   setModel,
   setSelectedPart,
-  updatePartDate,
 } from "../store/maintenanceSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import type { FrequencyType } from "../types/maintenance";
@@ -124,6 +125,30 @@ export function YourGarage() {
       dispatch(setFormError(error instanceof Error ? error.message : t("removePartFailed")));
     } finally {
       setRemovingPartId(null);
+    }
+  }
+
+  async function saveDrivingUsage() {
+    if (!activeCar) return;
+    dispatch(setFormError(""));
+    try {
+      const updatedCar = await garageApi.updateCar(activeCar.id, {
+        distance: activeCar.distance,
+        frequency: activeCar.frequency,
+      });
+      dispatch(
+        replaceCar({
+          ...updatedCar,
+          distance: activeCar.distance,
+          frequency: activeCar.frequency,
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        setFormError(
+          error instanceof Error ? error.message : t("updateCarFailed"),
+        ),
+      );
     }
   }
 
@@ -243,14 +268,7 @@ export function YourGarage() {
               value={activeCar?.distance ?? ""}
               disabled={!activeCar || removingCarId === activeCarId}
               onChange={(event) => dispatch(setDistance(event.target.value))}
-              onBlur={() => {
-                void garageApi
-                  .updateCar(activeCarId, {
-                    distance: activeCar?.distance ?? "",
-                    frequency: activeCar?.frequency ?? "week",
-                  })
-                  .catch(() => undefined);
-              }}
+              onBlur={() => void saveDrivingUsage()}
               aria-label={t("averageDistance")}
             />
             <span>km</span>
@@ -264,14 +282,7 @@ export function YourGarage() {
               onChange={(event) =>
                 dispatch(setFrequency(event.target.value as FrequencyType))
               }
-              onBlur={() => {
-                void garageApi
-                  .updateCar(activeCarId, {
-                    distance: activeCar?.distance ?? "",
-                    frequency: activeCar?.frequency ?? "week",
-                  })
-                  .catch(() => undefined);
-              }}
+              onBlur={() => void saveDrivingUsage()}
             >
               <option value="week">{t("week")}</option>
               <option value="month">{t("month")}</option>
@@ -380,17 +391,27 @@ export function YourGarage() {
                   value={tracked.lastServiced}
                   onChange={(event) => {
                     if (event.target.value) {
-                      const lastServiced = event.target.value;
-                      dispatch(
-                        updatePartDate({
-                          carId: activeCarId,
-                          id: tracked.id,
-                          lastServiced,
-                        }),
-                      );
                       void garageApi
-                        .updatePart(activeCarId, tracked.id, { lastServiced })
-                        .catch(() => undefined);
+                        .updatePart(activeCarId, tracked.id, {
+                          lastServiced: event.target.value,
+                        })
+                        .then((updatedPart) =>
+                          dispatch(
+                            replacePart({
+                              carId: activeCarId,
+                              part: updatedPart,
+                            }),
+                          ),
+                        )
+                        .catch((error: unknown) =>
+                          dispatch(
+                            setFormError(
+                              error instanceof Error
+                                ? error.message
+                                : t("updatePartFailed"),
+                            ),
+                          ),
+                        );
                     }
                   }}
                 />
