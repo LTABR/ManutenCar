@@ -17,20 +17,6 @@ import { Login } from "./Login";
 // @ts-ignore CSS side-effect imports are handled by the bundler.
 import "./styles/App.css";
 
-function addMonths(date: Date, months: number) {
-  const result = new Date(date);
-  const day = result.getDate();
-  result.setDate(1);
-  result.setMonth(result.getMonth() + months);
-  const lastDay = new Date(
-    result.getFullYear(),
-    result.getMonth() + 1,
-    0,
-  ).getDate();
-  result.setDate(Math.min(day, lastDay));
-  return result;
-}
-
 function calendarDaysFromNow(date: Date) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
@@ -68,33 +54,16 @@ function App() {
   const scheduled = useMemo<ScheduledItemType[]>(
     () =>
       cars.flatMap((car) => {
-        const value = Number(car.distance);
-        const kmPerMonth =
-          !Number.isFinite(value) || value <= 0
-            ? 0
-            : car.frequency === "week"
-              ? (value * 52) / 12
-              : car.frequency === "year"
-                ? value / 12
-                : value;
         return car.parts.map((tracked) => {
           const part = catalog.find(
             (item: PartType) => item.id === tracked.partId,
           );
           if (!part) return null;
-          const servicedAt = new Date(`${tracked.lastServiced}T12:00:00`);
-          const calendarDue = addMonths(servicedAt, part.intervalMonths);
-          const mileageDue = new Date(servicedAt);
-          if (kmPerMonth > 0) {
-            mileageDue.setDate(
-              mileageDue.getDate() +
-                Math.ceil((part.intervalKm / kmPerMonth) * 30.4375),
-            );
-          }
-          const nextDue =
-            kmPerMonth > 0 && mileageDue < calendarDue
-              ? mileageDue
-              : calendarDue;
+          const calendarDue = new Date(`${tracked.calendarDue}T12:00:00`);
+          const mileageDue = tracked.mileageDue
+            ? new Date(`${tracked.mileageDue}T12:00:00`)
+            : null;
+          const nextDue = new Date(`${tracked.expiresAt}T12:00:00`);
           const daysUntil = calendarDaysFromNow(nextDue);
           const status: ScheduledItemType["status"] =
             daysUntil < 0 ? "overdue" : daysUntil <= 45 ? "soon" : "on-track";
@@ -102,11 +71,12 @@ function App() {
             ...tracked,
             carId: car.id,
             carModel: car.model,
-            kmPerMonth,
             part,
             nextDue,
             calendarDue,
             mileageDue,
+            wearPercent: tracked.wearPercent,
+            dueBy: tracked.dueBy,
             daysUntil,
             status,
           };
