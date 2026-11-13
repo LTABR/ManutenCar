@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppSelector } from "../store/hooks";
 import { useAppDispatch } from "../store/hooks";
-import { updatePartDate } from "../store/maintenanceSlice";
+import { replacePart } from "../store/maintenanceSlice";
 import { garageApi } from "../api/garage";
 import type { PartType, TrackedPartType } from "../types/maintenance";
 import { Icon } from "./Icon";
@@ -13,11 +13,12 @@ type ScheduleStatusType = "overdue" | "soon" | "on-track";
 export type ScheduledItemType = TrackedPartType & {
   carId: string;
   carModel: string;
-  kmPerMonth: number;
   part: PartType;
   nextDue: Date;
   calendarDue: Date;
-  mileageDue: Date;
+  mileageDue: Date | null;
+  wearPercent: number;
+  dueBy: "time" | "mileage";
   daysUntil: number;
   status: ScheduleStatusType;
 };
@@ -69,8 +70,10 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
     setUpdatingPartId(partId);
     setUpdateErrorId(null);
     try {
-      await garageApi.updatePart(carId, partId, { lastServiced });
-      dispatch(updatePartDate({ carId, id: partId, lastServiced }));
+      const updatedPart = await garageApi.updatePart(carId, partId, {
+        lastServiced,
+      });
+      dispatch(replacePart({ carId, part: updatedPart }));
     } catch {
       setUpdateErrorId(partId);
     } finally {
@@ -169,11 +172,12 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
                 id,
                 carId,
                 carModel,
-                kmPerMonth,
                 part,
                 nextDue,
                 calendarDue,
                 mileageDue,
+                wearPercent,
+                dueBy,
                 daysUntil,
                 status,
               }) => (
@@ -222,7 +226,7 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
                               })}
                     </strong>
                     <span>
-                      {nextDue.getTime() < calendarDue.getTime()
+                      {dueBy === "mileage"
                         ? t("mileageEstimate")
                         : t("timeInterval")}
                     </span>
@@ -258,10 +262,10 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
                     <div className="details-popover">
                       {t("timeLimit")}: {formatDate(calendarDue)}
                       <br />
+                      {t("estimatedWear")}: {formatNumber(wearPercent)}%
+                      <br />
                       {t("mileageEstimate")}:{" "}
-                      {kmPerMonth > 0
-                        ? formatDate(mileageDue)
-                        : t("addAverageDistance")}
+                      {mileageDue ? formatDate(mileageDue) : t("addAverageDistance")}
                     </div>
                   </details>
                 </article>
