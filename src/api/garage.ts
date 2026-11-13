@@ -8,7 +8,7 @@ import type { CarType, TrackedPartType } from "../types/maintenance";
 export const garageApi = {
   listCars: () => apiRequest<CarType[]>("/cars"),
 
-  createCar: (car: Omit<CarType, "id">) =>
+  createCar: (car: Omit<CarType, "id" | "parts">) =>
     apiRequest<CarType>("/cars", {
       method: "POST",
       body: JSON.stringify(car),
@@ -23,7 +23,10 @@ export const garageApi = {
   deleteCar: (carId: string) =>
     apiRequest<void>(`/cars/${encodeURIComponent(carId)}`, { method: "DELETE" }),
 
-  addPart: (carId: string, part: Omit<TrackedPartType, "id">) =>
+  addPart: (
+    carId: string,
+    part: Pick<TrackedPartType, "partId" | "lastServiced">,
+  ) =>
     apiRequest<TrackedPartType>(`/cars/${encodeURIComponent(carId)}/parts`, {
       method: "POST",
       body: JSON.stringify(part),
@@ -32,7 +35,7 @@ export const garageApi = {
   updatePart: (
     carId: string,
     partId: string,
-    changes: Partial<Omit<TrackedPartType, "id" | "partId">>,
+    changes: Pick<TrackedPartType, "lastServiced">,
   ) =>
     apiRequest<TrackedPartType>(
       `/cars/${encodeURIComponent(carId)}/parts/${encodeURIComponent(partId)}`,
