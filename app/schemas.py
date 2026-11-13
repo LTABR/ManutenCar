@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -86,3 +86,28 @@ class CarResponse(BaseModel):
     distance: str
     frequency: str
     parts: list[dict[str, Any]]
+
+
+class MaintenanceHistoryItem(BaseModel):
+    """Item retornado pela busca de histórico de manutenções."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    car_id: str
+    part_id: str | None = None
+    part_type_id: str
+    part_name: str
+    service_date: date
+    mileage: float | None = None
+    notes: str | None = None
+    created_at: datetime
+
+
+class MaintenanceHistoryPage(BaseModel):
+    """Resposta paginada da busca de histórico."""
+
+    items: list[MaintenanceHistoryItem]
+    total: int
+    limit: int
+    offset: int

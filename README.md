@@ -135,6 +135,112 @@ Requisitos: Python v3.10 ou superior, Node.js v18 ou superior e MySQL Server
 
 ---
 
+## Histórico de Manutenções (API autenticada)
+
+Cada criação ou atualização da última revisão de uma peça gera automaticamente um evento na tabela `maintenance_history`. O histórico é append-only: atualizar a data de uma peça adiciona um novo registro em vez de sobrescrever o anterior.
+
+### Endpoint por carro
+
+```http
+GET /api/cars/{car_id}/maintenance-history
+Authorization: Bearer <token>
+```
+
+Filtros disponíveis (todos opcionais):
+
+| Parâmetro | Descrição |
+| :--- | :--- |
+| `part_id` | Id da peça acompanhada |
+| `part_type_id` | Tipo da peça (ex.: `engine-oil`) |
+| `date_from` / `date_to` | Período da data do serviço (`AAAA-MM-DD`) |
+| `search` | Busca por nome da peça ou observação |
+| `order` | `asc` ou `desc` (padrão: `desc`) |
+| `limit` | Itens por página, de 1 a 100 (padrão: 20) |
+| `offset` | Deslocamento da paginação (padrão: 0) |
+
+Exemplo:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8000/api/cars/$CAR_ID/maintenance-history?part_type_id=engine-oil&order=desc&limit=10"
+```
+
+Resposta:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid-do-evento",
+      "car_id": "uuid-do-carro",
+      "part_id": "uuid-da-peca",
+      "part_type_id": "engine-oil",
+      "part_name": "Engine oil & filter",
+      "service_date": "2024-06-20",
+      "mileage": null,
+      "notes": null,
+      "created_at": "2024-06-20T12:00:00"
+    }
+  ],
+  "total": 1,
+  "limit": 10,
+  "offset": 0
+}
+```
+
+### Busca global do usuário
+
+```http
+GET /api/maintenance-history
+Authorization: Bearer <token>
+```
+
+Aceita os mesmos filtros do endpoint por carro e, opcionalmente, `car_id`. A busca é sempre restrita aos veículos pertencentes ao usuário autenticado. Tentar acessar o histórico de um carro de outro usuário retorna `404`.
+
+O histórico de um carro é removido automaticamente quando o carro é excluído.
+
+## Visualização dos Prazos com Matplotlib
+
+O endpoint abaixo gera um gráfico PNG em memória, sem salvar arquivos no servidor:
+
+```http
+GET /api/cars/{car_id}/deadline-chart
+Authorization: Bearer <token>
+```
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8000/api/cars/$CAR_ID/deadline-chart" \
+  --output prazos.png
+```
+
+O gráfico usa barras horizontais com a quantidade de dias até o vencimento:
+
+- **Vermelho:** manutenção vencida (`overdue`).
+- **Âmbar:** vence em até 45 dias (`soon`).
+- **Verde:** em dia (`on-track`).
+
+O prazo é o menor entre o intervalo de tempo e a estimativa por quilometragem, usando a média semanal de uso do carro. A regra é a mesma do frontend em `src/pages/App.tsx` e está documentada em `app/deadlines.py`.
+
+### Dependências e execução
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+mysql -u root -p < schema.sql
+python -m uvicorn app.main:app --reload
+```
+
+O Matplotlib é usado com o backend `Agg` (`app/visualization.py`), adequado para servidores sem interface gráfica. Os testes automatizados usam SQLite em memória:
+
+```bash
+pytest -q
+```
+
+---
+
 ## Licença e Homologação
 
 Este projeto é de caráter estritamente acadêmico, desenvolvido e homologado com sucesso como parte da avaliação parcial M1 do curso de Engenharia de Software da UMC.

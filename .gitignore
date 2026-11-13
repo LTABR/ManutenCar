@@ -1,3 +1,17 @@
 node_modules/
 dist/
 *.tsbuildinfo
+
+# Ambiente virtual e cache do backend Python (gerados localmente)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Configuração local e segredos (cada dev cria a partir do .env.example)
+.env
+.env.local
+secrets/
+
+# Gráficos gerados localmente por scripts (quando usados)
+reports/

@@ -1,28 +1,44 @@
+from typing import Any, Literal
 from uuid import uuid4
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+
+import jwt
+from email.mime.text import MIMEText
+import smtplib
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session
+
+from .config import get_settings
 from .db import get_db
-from .models import Car, Part, User, part_payload
+from .deadlines import car_deadlines
+from .models import Car, MaintenanceHistory, Part, User, part_payload
+from .parts_catalog import matching_part_ids, part_name
 from .schemas import (
     CarCreate,
     CarResponse,
     CarUpdate,
+    EmailRequest,
     EncryptedLogin,
     LoginResponse,
+    MaintenanceHistoryItem,
+    MaintenanceHistoryPage,
     PartCreate,
     PartResponse,
     PartUpdate,
+    TokenConfirm,
+    UserCreate,
     UserResponse,
 )
-from .security import create_access_token, decrypt_login_payload, get_current_user, verify_password
-import smtplib
-from email.mime.text import MIMEText
-import jwt
-from datetime import datetime, timedelta
-from .config import get_settings
-from .schemas import UserCreate, EmailRequest, TokenConfirm
-from .security import get_password_hash
+from .security import (
+    create_access_token,
+    decrypt_login_payload,
+    get_current_user,
+    hash_password,
+    verify_password,
+)
+from .visualization import render_deadline_chart
+from datetime import date, datetime, timedelta
 
 router = APIRouter()
 
@@ -49,6 +65,242 @@ def response_car(db: Session, car: Car) -> CarResponse:
         frequency="week",
         parts=[part_payload(part) for part in parts],
     )
+
+
+def record_maintenance(
+    db: Session,
+    car: Car,
+    part: Part,
+    service_date: date,
+    mileage: float | None = None,
+    notes: str | None = None,
+) -> MaintenanceHistory:
+    """Adiciona um evento ao histórico imutável de manutenções.
+
+    O registro é criado automaticamente ao adicionar uma peça ou ao
+    atualizar a data da última revisão. O histórico nunca é sobrescrito.
+    """
+
+    record = MaintenanceHistory(
+        id=str(uuid4()),
+        car_id=car.id,
+        part_id=part.id,
+        part_type_id=part.part_type_id,
+        service_date=service_date,
+        mileage=mileage,
+        notes=notes,
+    )
+    db.add(record)
+    return record
+
+
+def history_item(record: MaintenanceHistory) -> MaintenanceHistoryItem:
+    """Converte o model do histórico no schema de resposta da API."""
+
+    return MaintenanceHistoryItem(
+        id=record.id,
+        car_id=record.car_id,
+        part_id=record.part_id,
+        part_type_id=record.part_type_id,
+        part_name=part_name(record.part_type_id, record.part_type_id),
+        service_date=record.service_date,
+        mileage=float(record.mileage) if record.mileage is not None else None,
+        notes=record.notes,
+        created_at=record.created_at,
+    )
+
+
+def owned_car_ids(db: Session, user: User) -> list[str]:
+    """Lista os ids de todos os carros pertencentes ao usuário autenticado."""
+
+    cars = db.scalars(select(Car)).all()
+    return [car.id for car in cars if user.id in (car.owners_ids or [])]
+
+
+def maintenance_history_page(
+    db: Session,
+    user: User,
+    car_id: str | None = None,
+    part_id: str | None = None,
+    part_type_id: str | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    search: str | None = None,
+    order: Literal["asc", "desc"] = "desc",
+    limit: int = 20,
+    offset: int = 0,
+) -> MaintenanceHistoryPage:
+    """Monta a busca paginada e autenticada do histórico de manutenções.
+
+    Quando ``car_id`` é informado, valida a propriedade do carro antes de
+    consultar. Caso contrário, restringe a busca aos carros do usuário.
+    """
+
+    conditions: list[Any] = []
+    if car_id is not None:
+        # A validação de propriedade evita que um usuário consulte o
+        # histórico de um carro que não é seu.
+        conditions.append(MaintenanceHistory.car_id == owned_car(db, user, car_id).id)
+    else:
+        conditions.append(MaintenanceHistory.car_id.in_(owned_car_ids(db, user)))
+
+    if part_id:
+        conditions.append(MaintenanceHistory.part_id == part_id)
+    if part_type_id:
+        conditions.append(MaintenanceHistory.part_type_id == part_type_id)
+    if date_from:
+        conditions.append(MaintenanceHistory.service_date >= date_from)
+    if date_to:
+        conditions.append(MaintenanceHistory.service_date <= date_to)
+    if search and search.strip():
+        pattern = f"%{search.strip()}%"
+        search_conditions = [
+            MaintenanceHistory.part_type_id.ilike(pattern),
+            MaintenanceHistory.notes.ilike(pattern),
+        ]
+        # O nome da peça não fica no banco; traduzimos o termo para os
+        # ids correspondentes do catálogo para permitir busca por nome.
+        matched_ids = matching_part_ids(search)
+        if matched_ids:
+            search_conditions.append(MaintenanceHistory.part_type_id.in_(matched_ids))
+        conditions.append(or_(*search_conditions))
+
+    total = db.scalar(
+        select(func.count()).select_from(MaintenanceHistory).where(*conditions)
+    ) or 0
+    ordering = (
+        MaintenanceHistory.service_date.asc()
+        if order == "asc"
+        else MaintenanceHistory.service_date.desc()
+    )
+    records = db.scalars(
+        select(MaintenanceHistory)
+        .where(*conditions)
+        .order_by(ordering, MaintenanceHistory.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    ).all()
+    return MaintenanceHistoryPage(
+        items=[history_item(record) for record in records],
+        total=int(total),
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/cars/{car_id}/maintenance-history",
+    response_model=MaintenanceHistoryPage,
+    summary="Busca o histórico de manutenções de um carro",
+)
+def car_maintenance_history(
+    car_id: str,
+    part_id: str | None = Query(default=None, description="Filtra por id da peça"),
+    part_type_id: str | None = Query(default=None, description="Filtra pelo tipo da peça"),
+    date_from: date | None = Query(default=None, description="Data inicial do serviço"),
+    date_to: date | None = Query(default=None, description="Data final do serviço"),
+    search: str | None = Query(default=None, max_length=120, description="Busca por peça ou observação"),
+    order: Literal["asc", "desc"] = Query(default="desc", description="Ordenação por data do serviço"),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Retorna o histórico paginado e filtrado de um carro do usuário.
+
+    Requer o token JWT no cabeçalho ``Authorization: Bearer <token>``.
+    Carros de outros usuários retornam ``404`` para não revelar sua existência.
+    """
+
+    return maintenance_history_page(
+        db,
+        user,
+        car_id=car_id,
+        part_id=part_id,
+        part_type_id=part_type_id,
+        date_from=date_from,
+        date_to=date_to,
+        search=search,
+        order=order,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/maintenance-history",
+    response_model=MaintenanceHistoryPage,
+    summary="Busca o histórico de manutenções de todos os carros do usuário",
+)
+def all_maintenance_history(
+    car_id: str | None = Query(default=None, description="Restringe a busca a um carro"),
+    part_id: str | None = Query(default=None, description="Filtra por id da peça"),
+    part_type_id: str | None = Query(default=None, description="Filtra pelo tipo da peça"),
+    date_from: date | None = Query(default=None, description="Data inicial do serviço"),
+    date_to: date | None = Query(default=None, description="Data final do serviço"),
+    search: str | None = Query(default=None, max_length=120, description="Busca por peça ou observação"),
+    order: Literal["asc", "desc"] = Query(default="desc", description="Ordenação por data do serviço"),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Busca autenticada em todo o histórico do usuário.
+
+    Aceita os mesmos filtros do endpoint por carro e pode ser restringida
+    com o parâmetro opcional ``car_id``.
+    """
+
+    return maintenance_history_page(
+        db,
+        user,
+        car_id=car_id,
+        part_id=part_id,
+        part_type_id=part_type_id,
+        date_from=date_from,
+        date_to=date_to,
+        search=search,
+        order=order,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/cars/{car_id}/deadline-chart",
+    summary="Gera um gráfico PNG com os prazos do carro",
+    responses={200: {"content": {"image/png": {}}}},
+)
+def car_deadline_chart(
+    car_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Gera, com Matplotlib, um gráfico dos prazos das peças do carro.
+
+    O gráfico usa barras horizontais com a quantidade de dias até o
+    vencimento. Cores: vermelho (vencido), âmbar (vence em até 45 dias)
+    e verde (em dia). Requer autenticação e propriedade do carro.
+    """
+
+    car = owned_car(db, user, car_id)
+    parts = (
+        db.scalars(select(Part).where(Part.id.in_(car.parts_ids or []))).all()
+        if car.parts_ids
+        else []
+    )
+    if not car_deadlines(parts, float(car.weekly_usage or 0)):
+        raise HTTPException(
+            status_code=404,
+            detail="No parts with known maintenance intervals",
+        )
+    image = render_deadline_chart(car, parts, float(car.weekly_usage or 0))
+    return Response(
+        content=image,
+        media_type="image/png",
+        headers={"Content-Disposition": f'inline; filename="prazos-{car.id}.png"'},
+    )
+
 
 @router.post("/auth/login", response_model=LoginResponse)
 def login(payload: EncryptedLogin, db: Session = Depends(get_db)):
@@ -103,6 +355,8 @@ def update_car(car_id: str, payload: CarUpdate, user: User = Depends(get_current
 @router.delete("/cars/{car_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_car(car_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     car = owned_car(db, user, car_id)
+    # O histórico pertence ao carro e deve ser removido junto com ele.
+    db.execute(delete(MaintenanceHistory).where(MaintenanceHistory.car_id == car.id))
     db.delete(car)
     db.commit()
 
@@ -115,6 +369,8 @@ def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_
     part = Part(id=payload.id or str(uuid4()), part_type_id=part_type_id, last_maintenance=payload.maintenance_date())
     db.add(part)
     car.parts_ids = [*(car.parts_ids or []), part.id]
+    # Toda peça adicionada começa com um evento no histórico.
+    record_maintenance(db, car, part, part.last_maintenance)
     db.commit()
     db.refresh(part)
     return part_payload(part)
@@ -127,7 +383,12 @@ def update_part(car_id: str, part_id: str, payload: PartUpdate, user: User = Dep
     part = db.get(Part, part_id)
     if not part:
         raise HTTPException(status_code=404, detail="Part not found")
-    part.last_maintenance = payload.maintenance_date()
+    new_service_date = payload.maintenance_date()
+    # Só registra um novo evento quando a data realmente muda; isso evita
+    # duplicar o histórico caso o frontend reenvie a mesma data.
+    if new_service_date != part.last_maintenance:
+        record_maintenance(db, car, part, new_service_date)
+    part.last_maintenance = new_service_date
     db.commit()
     db.refresh(part)
     return part_payload(part)
@@ -167,7 +428,7 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         id=str(uuid4()),
         email=payload.email,
-        password_hash=get_password_hash(payload.password)
+        password_hash=hash_password(payload.password)
     )
     db.add(new_user)
     db.commit()
@@ -182,7 +443,7 @@ def recover_password(payload: EmailRequest, db: Session = Depends(get_db)):
         settings = get_settings()
         token = jwt.encode({"sub": user.email, "exp": datetime.utcnow() + timedelta(minutes=15)}, settings.jwt_secret, algorithm="HS256")
         link = f"https://manutencar.com.br/redefinir?token={token}"
-        enviar_email(user.email, "ManutenCar - Redefinição", f"Link: {link}")
+        send_email(user.email, "ManutenCar - Redefinição", f"Link: {link}")
     return {"message": "Se o e-mail existir, um link foi enviado."}
 
 # SOLICITAÇÃO DE EXCLUSÃO LGPD
@@ -191,7 +452,7 @@ def request_deletion(user: User = Depends(get_current_user)):
     settings = get_settings()
     token = jwt.encode({"sub": user.email, "action": "delete", "exp": datetime.utcnow() + timedelta(minutes=15)}, settings.jwt_secret, algorithm="HS256")
     link = f"https://manutencar.com.br/excluir?token={token}"
-    enviar_email(user.email, "ManutenCar - Confirmação de Exclusão", f"Confirme a exclusão irreversível (LGPD): {link}")
+    send_email(user.email, "ManutenCar - Confirmação de Exclusão", f"Confirme a exclusão irreversível (LGPD): {link}")
     return {"message": "E-mail de validação enviado."}
 
 # CONFIRMAÇÃO DE EXCLUSÃO LGPD

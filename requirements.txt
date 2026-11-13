@@ -1,0 +1,15 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sqlalchemy==2.0.37
+pymysql==1.1.1
+pydantic-settings==2.7.1
+PyJWT==2.10.1
+bcrypt==4.2.1
+cryptography==44.0.0
+
+# Geração dos gráficos de prazos (backend Matplotlib/Agg).
+matplotlib>=3.8,<4
+
+# Dependências usadas apenas pelos testes automatizados.
+pytest==8.3.4
+httpx==0.28.1
