@@ -31,6 +31,12 @@ const maintenanceSlice = createSlice({
       state.selectedPart = "";
       state.formError = "";
     },
+    replaceCar(state, action: PayloadAction<CarType>) {
+      const carIndex = state.cars.findIndex(
+        (car) => car.id === action.payload.id,
+      );
+      if (carIndex >= 0) state.cars[carIndex] = action.payload;
+    },
     addCar(state, action: PayloadAction<CarType>) {
       state.cars.push(action.payload);
       state.activeCarId = action.payload.id;
@@ -88,13 +94,17 @@ const maintenanceSlice = createSlice({
       state.selectedPart = "";
       state.formError = "";
     },
-    updatePartDate(
+    replacePart(
       state,
-      action: PayloadAction<{ carId: string; id: string; lastServiced: string }>,
+      action: PayloadAction<{ carId: string; part: TrackedPartType }>,
     ) {
       const car = state.cars.find((item) => item.id === action.payload.carId);
-      const part = car?.parts.find((item) => item.id === action.payload.id);
-      if (part) part.lastServiced = action.payload.lastServiced;
+      const partIndex = car?.parts.findIndex(
+        (item) => item.id === action.payload.part.id,
+      );
+      if (car && partIndex !== undefined && partIndex >= 0) {
+        car.parts[partIndex] = action.payload.part;
+      }
     },
     removePart(state, action: PayloadAction<{ carId: string; id: string }>) {
       const car = state.cars.find((item) => item.id === action.payload.carId);
@@ -115,7 +125,8 @@ export const {
   setFrequency,
   setModel,
   setSelectedPart,
-  updatePartDate,
+  replacePart,
+  replaceCar,
   replaceCars,
 } = maintenanceSlice.actions;
 
