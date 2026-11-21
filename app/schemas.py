@@ -33,6 +33,30 @@ class PartResponse(BaseModel):
     partId: str
     lastServiced: date
 
+class MaintenanceHistoryItem(BaseModel):
+    id: str
+    vehicle_id: str
+    part_id: str | None
+    part_name: str | None
+    service_date: date
+    title: str
+    description: str | None
+    category: str | None
+    status: str | None
+
+class MaintenanceHistoryResponse(BaseModel):
+    items: list[MaintenanceHistoryItem]
+    total: int
+    page: int
+    page_size: int
+
+class MaintenanceDeadlineItem(BaseModel):
+    label: str = Field(max_length=120)
+    days_until: int
+
+class MaintenanceDeadlinesRequest(BaseModel):
+    deadlines: list[MaintenanceDeadlineItem] = Field(max_length=100)
+
 class CarCreate(BaseModel):
     brand: str = ""
     model: str = ""

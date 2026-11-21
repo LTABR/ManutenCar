@@ -1,0 +1,11 @@
+bcrypt
+cryptography
+fastapi
+matplotlib
+PyMySQL
+pydantic-settings
+PyJWT
+SQLAlchemy
+httpx
+pytest
+uvicorn

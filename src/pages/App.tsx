@@ -4,6 +4,7 @@ import { LookingAhead } from "../components/LookingAhead";
 import type { ScheduledItemType } from "../components/LookingAhead";
 import { SectionKicker } from "../components/styles/sharedStyles";
 import { YourGarage } from "../components/YourGarage";
+import { VehicleMaintenanceDetails } from "../components/VehicleMaintenanceDetails";
 import { catalog } from "../data/parts";
 import { useAppSelector } from "../store/hooks";
 import { useAppDispatch } from "../store/hooks";
@@ -44,26 +45,6 @@ function App() {
   const dispatch = useAppDispatch();
   const { theme, setTheme, locale, setLocale } = usePreferences();
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
-
-  useEffect(() => {
-    if (!user) {
-      dispatch(replaceCars([]));
-      return;
-    }
-    let cancelled = false;
-    garageApi
-      .listCars()
-      .then((loadedCars) => {
-        if (!cancelled) dispatch(replaceCars(loadedCars));
-      })
-      .catch(() => {
-        // Keep the local planner usable while an API is being configured.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [dispatch, user]);
 
   const scheduled = useMemo<ScheduledItemType[]>(
     () =>
@@ -116,8 +97,6 @@ function App() {
       .sort((a, b) => a.nextDue.getTime() - b.nextDue.getTime()),
     [cars],
   );
-
-  if (!user) return <Login />;
 
   return (
     <div className="app-shell">
@@ -214,6 +193,14 @@ function App() {
           <YourGarage />
           <LookingAhead scheduled={scheduled} />
         </section>
+
+        {activeCar && (
+          <VehicleMaintenanceDetails
+            vehicleId={activeCar.id}
+            vehicleName={activeCarName}
+            scheduled={activeSchedule}
+          />
+        )}
 
         <section className="how-section" id="how-it-works">
           <div>
