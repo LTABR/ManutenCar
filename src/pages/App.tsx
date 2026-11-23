@@ -41,10 +41,30 @@ function calendarDaysFromNow(date: Date) {
 }
 
 function App() {
+  const { user, loading, logout } = useAuth();
   const cars = useAppSelector((state) => state.maintenance.cars);
+  const activeCarId = useAppSelector((state) => state.maintenance.activeCarId);
   const dispatch = useAppDispatch();
   const { theme, setTheme, locale, setLocale } = usePreferences();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    garageApi
+      .listCars()
+      .then((loadedCars) => {
+        if (active) {
+          dispatch(replaceCars(loadedCars));
+        }
+      })
+      .catch(() => {
+        // Mantém estado local caso a API falhe
+      });
+    return () => {
+      active = false;
+    };
+  }, [user, dispatch]);
 
   const scheduled = useMemo<ScheduledItemType[]>(
     () =>
@@ -95,6 +115,31 @@ function App() {
       })
       .filter((item): item is ScheduledItemType => item !== null)
       .sort((a, b) => a.nextDue.getTime() - b.nextDue.getTime()),
+    [cars],
+  );
+
+  const activeCar = useMemo(
+    () => cars.find((car) => car.id === activeCarId) ?? cars[0] ?? null,
+    [cars, activeCarId],
+  );
+
+  const activeCarName = activeCar ? activeCar.model : "";
+
+  const activeSchedule = useMemo(
+    () =>
+      activeCar
+        ? scheduled.filter((item) => item.carId === activeCar.id)
+        : [],
+    [scheduled, activeCar],
+  );
+
+  if (loading) {
+    return null;
+  }
+
+  if (!user) {
+    return <Login />;
+  }
     [cars],
   );
 
