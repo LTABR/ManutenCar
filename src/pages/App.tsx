@@ -140,8 +140,6 @@ function App() {
   if (!user) {
     return <Login />;
   }
-    [cars],
-  );
 
   return (
     <div className="app-shell">
