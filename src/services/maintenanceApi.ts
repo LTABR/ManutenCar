@@ -32,6 +32,14 @@ export interface MaintenanceDeadline {
   days_until: number;
 }
 
+export interface MaintenanceDeadlineRow {
+  part_id: string;
+  last_serviced: string | null;
+  due_date: string | null;
+  days_until: number | null;
+  status: "untracked" | "on-track" | "soon" | "overdue";
+}
+
 async function request(
   path: string,
   init: RequestInit = {},
@@ -83,17 +91,22 @@ export async function fetchMaintenanceHistory(
 
 export async function fetchMaintenanceDeadlinesChart(
   vehicleId: string,
-  deadlines: MaintenanceDeadline[],
   signal?: AbortSignal,
 ): Promise<Blob> {
   const response = await request(
     `/cars/${encodeURIComponent(vehicleId)}/maintenance-deadlines-chart`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deadlines }),
-      signal,
-    },
+    { signal },
   );
   return response.blob();
+}
+
+export async function fetchMaintenanceDeadlines(
+  vehicleId: string,
+  signal?: AbortSignal,
+): Promise<MaintenanceDeadlineRow[]> {
+  const response = await request(
+    `/cars/${encodeURIComponent(vehicleId)}/maintenance-deadlines`,
+    { signal },
+  );
+  return (await response.json()) as MaintenanceDeadlineRow[];
 }

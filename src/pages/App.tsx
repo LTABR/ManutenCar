@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "../components/Icon";
 import { LookingAhead } from "../components/LookingAhead";
 import type { ScheduledItemType } from "../components/LookingAhead";
@@ -15,6 +15,8 @@ import { usePreferences } from "../preferences";
 import { isLocaleType, localeOptions, useTranslation } from "../langsDict";
 import { useAuth } from "../auth";
 import { Login } from "./Login";
+import { Support } from "./Support";
+import { readStoredValue, writeStoredValue } from "../storage";
 // @ts-ignore CSS side-effect imports are handled by the bundler.
 import "./styles/App.css";
 
@@ -47,6 +49,8 @@ function App() {
   const dispatch = useAppDispatch();
   const { theme, setTheme, locale, setLocale } = usePreferences();
   const { t } = useTranslation();
+  const [activeView, setActiveView] = useState<"garage" | "support">(() => readStoredValue("activeView", "garage"));
+  useEffect(() => writeStoredValue("activeView", activeView), [activeView]);
 
   useEffect(() => {
     if (!user) return;
@@ -145,12 +149,7 @@ function App() {
     <div className="app-shell">
       <header className="topbar">
         <a className="brand" href="#" aria-label={t("home")}>
-          <span className="brand-mark">
-            <Icon name="wrench" size={19} />
-          </span>
-          <span>
-            ManutenCar<span className="brand-period">.</span>
-          </span>
+          <img className="brand-logo" src="/logo_ManutenCar.jpeg" alt="ManutenCar" />
         </a>
         <div className="topbar-note">
           <span className="live-dot" /> {t("personalPlanner")}
@@ -184,6 +183,9 @@ function App() {
           <a className="topbar-link" href="#how-it-works">
             {t("howItWorks")} <Icon name="arrow" size={15} />
           </a>
+          <button className={`support-nav-button ${activeView === "support" ? "active" : ""}`} type="button" onClick={() => setActiveView(activeView === "support" ? "garage" : "support")}>
+            Support
+          </button>
           <button className="logout-button" type="button" onClick={logout}>
             <span>{user.name}</span><Icon name="logout" size={15} />
           </button>
@@ -191,6 +193,8 @@ function App() {
       </header>
 
       <main>
+        {activeView === "support" ? <Support /> : (
+        <>
         <section className="hero">
           <div className="hero-copy">
             <div className="eyebrow">
@@ -254,6 +258,8 @@ function App() {
           </div>
           <p>{t("howDescription")}</p>
         </section>
+        </>
+        )}
       </main>
       <footer className="page-footer">
         <span>

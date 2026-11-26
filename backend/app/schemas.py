@@ -1,7 +1,8 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Literal
 
 
 class EncryptedAuthPayload(BaseModel):
@@ -86,3 +87,54 @@ class CarResponse(BaseModel):
     distance: str
     frequency: str
     parts: list[dict[str, Any]]
+
+
+class SupportTicketCreate(BaseModel):
+    category: Literal["Account/Login", "Vehicle & Maintenance Calculations", "System Bug", "General Question"]
+    subject: str = Field(min_length=3, max_length=160)
+    description: str = Field(min_length=10, max_length=4000)
+
+
+class SupportTicketResponse(BaseModel):
+    id: str
+    category: str
+    subject: str
+    description: str
+    status: str
+    created_at: datetime
+
+
+class MaintenanceHistoryItem(BaseModel):
+    id: str
+    vehicle_id: str
+    part_id: str | None
+    part_name: str | None
+    service_date: date
+    title: str
+    description: str | None
+    category: str | None
+    status: str | None
+
+
+class MaintenanceHistoryResponse(BaseModel):
+    items: list[MaintenanceHistoryItem]
+    total: int
+    page: int
+    page_size: int
+
+
+class MaintenanceDeadlineRequestItem(BaseModel):
+    label: str = Field(max_length=120)
+    days_until: int
+
+
+class MaintenanceDeadlinesRequest(BaseModel):
+    deadlines: list[MaintenanceDeadlineRequestItem] = Field(max_length=100)
+
+
+class MaintenanceDeadlineResponse(BaseModel):
+    part_id: str
+    last_serviced: date | None
+    due_date: date | None
+    days_until: int | None
+    status: Literal["untracked", "on-track", "soon", "overdue"]

@@ -3,8 +3,10 @@ import { catalog } from "../data/parts";
 import { useTranslation } from "../langsDict";
 import type { ScheduledItemType } from "./LookingAhead";
 import {
+  fetchMaintenanceDeadlines,
   fetchMaintenanceDeadlinesChart,
   fetchMaintenanceHistory,
+  type MaintenanceDeadlineRow,
   type MaintenanceHistoryResponse,
 } from "../services/maintenanceApi";
 import { Icon } from "./Icon";
@@ -41,7 +43,7 @@ export function VehicleMaintenanceDetails({
   vehicleName,
   scheduled,
 }: VehicleMaintenanceDetailsProps) {
-  const { t, formatDate, formatNumber, interpolate } = useTranslation();
+  const { t, partName, formatDate, formatNumber, interpolate } = useTranslation();
   const statusLabels: Record<string, string> = {
     completed: t("completed"),
     scheduled: t("scheduled"),
@@ -53,6 +55,10 @@ export function VehicleMaintenanceDetails({
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError, setChartError] = useState("");
   const [chartAttempt, setChartAttempt] = useState(0);
+  const [deadlines, setDeadlines] = useState<MaintenanceDeadlineRow[]>([]);
+  const [deadlinesLoading, setDeadlinesLoading] = useState(true);
+  const [deadlinesError, setDeadlinesError] = useState("");
+  const [deadlinesAttempt, setDeadlinesAttempt] = useState(0);
 
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
@@ -69,12 +75,10 @@ export function VehicleMaintenanceDetails({
     () => [...new Set(catalog.map((part) => part.category))].sort(),
     [],
   );
-  const chartDeadlines = useMemo(
-    () =>
-      scheduled.map((item) => ({
-        label: item.part.name,
-        days_until: item.daysUntil,
-      })),
+  const scheduleRevision = useMemo(
+    () => scheduled
+      .map((item) => `${item.id}:${item.lastServiced}:${item.kmPerMonth}:${item.daysUntil}`)
+      .join("|"),
     [scheduled],
   );
 
@@ -90,20 +94,9 @@ export function VehicleMaintenanceDetails({
     const controller = new AbortController();
     let objectUrl = "";
 
-    if (chartDeadlines.length === 0) {
-      setChartUrl("");
-      setChartError("");
-      setChartLoading(false);
-      return () => controller.abort();
-    }
-
     setChartLoading(true);
     setChartError("");
-    void fetchMaintenanceDeadlinesChart(
-      vehicleId,
-      chartDeadlines,
-      controller.signal,
-    )
+    void fetchMaintenanceDeadlinesChart(vehicleId, controller.signal)
       .then((blob) => {
         objectUrl = URL.createObjectURL(blob);
         setChartUrl(objectUrl);
@@ -121,7 +114,25 @@ export function VehicleMaintenanceDetails({
       controller.abort();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [chartAttempt, chartDeadlines, vehicleId]);
+  }, [chartAttempt, scheduleRevision, vehicleId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setDeadlinesLoading(true);
+    setDeadlinesError("");
+    void fetchMaintenanceDeadlines(vehicleId, controller.signal)
+      .then(setDeadlines)
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setDeadlines([]);
+          setDeadlinesError(error instanceof Error ? error.message : "Request failed");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDeadlinesLoading(false);
+      });
+    return () => controller.abort();
+  }, [deadlinesAttempt, scheduleRevision, vehicleId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -195,10 +206,6 @@ export function VehicleMaintenanceDetails({
               {t("retry")}
             </button>
           </div>
-        ) : chartDeadlines.length === 0 ? (
-          <div className="maintenance-feedback">
-            <p>{t("noScheduledMaintenance")}</p>
-          </div>
         ) : chartUrl ? (
           <div className="maintenance-chart-image-wrap">
             <img
@@ -208,6 +215,55 @@ export function VehicleMaintenanceDetails({
             />
           </div>
         ) : null}
+        <div className="maintenance-deadlines-table-wrap">
+          <h3>{t("maintenanceDeadlines")}</h3>
+          {deadlinesLoading ? (
+            <p>{t("loading")}</p>
+          ) : deadlinesError ? (
+            <div className="maintenance-feedback maintenance-error" role="alert">
+              <p>{t("maintenanceLoadError")}: {deadlinesError}</p>
+              <button
+                type="button"
+                onClick={() => setDeadlinesAttempt((attempt) => attempt + 1)}
+              >
+                {t("retry")}
+              </button>
+            </div>
+          ) : (
+            <table className="maintenance-deadlines-table">
+              <thead>
+                <tr>
+                  <th scope="col">{t("component")}</th>
+                  <th scope="col">{t("lastService")}</th>
+                  <th scope="col">{t("nextDue")}</th>
+                  <th scope="col">{t("status")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deadlines.map((deadline) => (
+                  <tr key={deadline.part_id}>
+                    <th scope="row">
+                      {partName(deadline.part_id, deadline.part_id.replace("-", " "))}
+                    </th>
+                    <td>{deadline.last_serviced
+                      ? formatDate(new Date(`${deadline.last_serviced}T12:00:00`))
+                      : "—"}</td>
+                    <td>{deadline.due_date
+                      ? formatDate(new Date(`${deadline.due_date}T12:00:00`))
+                      : "—"}</td>
+                    <td>
+                      <span className={`deadline-status deadline-status--${deadline.status}`}>
+                        {deadline.status === "untracked"
+                          ? t("notTracked")
+                          : statusLabels[deadline.status] ?? deadline.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </Card>
 
       <Card as="section" className="maintenance-history-card">

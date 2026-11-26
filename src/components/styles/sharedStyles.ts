@@ -49,27 +49,27 @@ export const SelectControl = styled.select`
 `;
 
 const partColors: Record<PartColorType, [string, string]> = {
-  orange: ["#be7951", "#fbf1e9"],
-  blue: ["#5a809f", "#eef3f8"],
-  green: ["#568166", "#edf4ed"],
-  red: ["#ad6460", "#f8eeee"],
-  purple: ["#816c9b", "#f3eff7"],
-  yellow: ["#a78a47", "#f8f4e9"],
-  teal: ["#4d8984", "#eaf4f2"],
-  pink: ["#a76f82", "#f8eef2"],
-  slate: ["#647784", "#edf1f4"],
+  orange: ["#F36808", "#FFF1E7"],
+  blue: ["#14325C", "#E7EDF5"],
+  navy: ["#14325C", "#E7EDF5"],
+  red: ["#F36808", "#FFF1E7"],
+  purple: ["#1E467A", "#E7EDF5"],
+  yellow: ["#F36808", "#FFF1E7"],
+  teal: ["#14325C", "#E7EDF5"],
+  pink: ["#F36808", "#FFF1E7"],
+  slate: ["#475569", "#E2E8F0"],
 };
 
 const darkPartColors: Record<PartColorType, [string, string]> = {
-  orange: ["#e5ad8a", "#49352a"],
-  blue: ["#a5c3df", "#293b4c"],
-  green: ["#a7cfad", "#2c4032"],
-  red: ["#e0a09b", "#472f30"],
-  purple: ["#c4aedc", "#3b3248"],
-  yellow: ["#d8c17f", "#453d28"],
-  teal: ["#9bcac5", "#293e3b"],
-  pink: ["#d8a6b8", "#45313a"],
-  slate: ["#afc0cd", "#303b43"],
+  orange: ["#FF9B55", "#4A2A12"],
+  blue: ["#93B4DE", "#0E2444"],
+  navy: ["#93B4DE", "#0E2444"],
+  red: ["#FF9B55", "#4A2A12"],
+  purple: ["#93B4DE", "#1E467A"],
+  yellow: ["#FF9B55", "#4A2A12"],
+  teal: ["#93B4DE", "#1E467A"],
+  pink: ["#FF9B55", "#4A2A12"],
+  slate: ["#CBD5E1", "#1E467A"],
 };
 
 export const PartMarker = styled.span<{ $tone: PartColorType }>`
@@ -104,10 +104,10 @@ export const IconButton = styled.button`
   display: grid;
   place-items: center;
   border: 0;
-  color: #969e98;
+  color: #475569;
   background: transparent;
 
   &:hover {
-    color: #b55c53;
+    color: #F36808;
   }
 `;

@@ -1,6 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Literal
 
 class UserCreate(BaseModel):
     email: str
@@ -57,6 +58,15 @@ class MaintenanceDeadlineItem(BaseModel):
 class MaintenanceDeadlinesRequest(BaseModel):
     deadlines: list[MaintenanceDeadlineItem] = Field(max_length=100)
 
+
+class MaintenanceDeadlineResponse(BaseModel):
+    part_id: str
+    last_serviced: date | None
+    due_date: date | None
+    days_until: int | None
+    status: Literal["untracked", "on-track", "soon", "overdue"]
+
+
 class CarCreate(BaseModel):
     brand: str = ""
     model: str = ""
@@ -110,3 +120,18 @@ class CarResponse(BaseModel):
     distance: str
     frequency: str
     parts: list[dict[str, Any]]
+
+
+class SupportTicketCreate(BaseModel):
+    category: Literal["Account/Login", "Vehicle & Maintenance Calculations", "System Bug", "General Question"]
+    subject: str = Field(min_length=3, max_length=160)
+    description: str = Field(min_length=10, max_length=4000)
+
+
+class SupportTicketResponse(BaseModel):
+    id: str
+    category: str
+    subject: str
+    description: str
+    status: str
+    created_at: datetime

@@ -4,8 +4,9 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from .db import get_db
-from .models import Car, MaintenanceRecord, Part, User, part_payload
+from .models import Car, MaintenanceRecord, Part, SupportTicket, User, part_payload
 from .maintenance_history import query_maintenance_history
+from .maintenance_deadlines import calculate_mandatory_deadlines
 from .maintenance_charts import MaintenanceDeadline, render_deadline_chart
 from .schemas import (
     CarCreate,
@@ -15,10 +16,13 @@ from .schemas import (
     LoginResponse,
     MaintenanceDeadlinesRequest,
     MaintenanceHistoryResponse,
+    MaintenanceDeadlineResponse,
     PartCreate,
     PartResponse,
     PartUpdate,
     UserResponse,
+    SupportTicketCreate,
+    SupportTicketResponse,
 )
 from .security import create_access_token, decrypt_login_payload, get_current_user, verify_password
 import smtplib
@@ -177,6 +181,52 @@ def get_maintenance_deadlines_chart(
         headers={"Content-Disposition": 'inline; filename="maintenance-deadlines.png"'},
     )
 
+
+def _car_deadlines(db: Session, car: Car):
+    parts = db.scalars(select(Part).where(Part.id.in_(car.parts_ids or []))).all()
+    return calculate_mandatory_deadlines(car, parts)
+
+
+@router.get(
+    "/cars/{vehicle_id}/maintenance-deadlines",
+    response_model=list[MaintenanceDeadlineResponse],
+)
+def get_mandatory_maintenance_deadlines(
+    vehicle_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return _car_deadlines(db, owned_car(db, user, vehicle_id))
+
+
+@router.get("/cars/{vehicle_id}/maintenance-deadlines-chart")
+def get_calculated_maintenance_deadlines_chart(
+    vehicle_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    car = owned_car(db, user, vehicle_id)
+    deadlines = [
+        deadline
+        for deadline in _car_deadlines(db, car)
+        if deadline.days_until is not None
+    ]
+    chart = render_deadline_chart(
+        MaintenanceDeadline(
+            label=deadline.part_id.replace("-", " ").title(),
+            days_until=deadline.days_until,
+        )
+        for deadline in deadlines
+    )
+    return StreamingResponse(
+        chart,
+        media_type="image/png",
+        headers={
+            "Content-Disposition": 'inline; filename="maintenance-deadlines.png"',
+            "Cache-Control": "no-store",
+        },
+    )
+
 @router.post("/cars/{car_id}/parts", response_model=PartResponse, status_code=status.HTTP_201_CREATED)
 def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     car = owned_car(db, user, car_id)
@@ -192,6 +242,8 @@ def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_
         part_id=part.id,
         service_date=part.last_maintenance,
         title=part_type_id,
+        category=part_type_id,
+        status="completed",
     ))
     db.commit()
     db.refresh(part)
@@ -213,6 +265,8 @@ def update_part(car_id: str, part_id: str, payload: PartUpdate, user: User = Dep
             part_id=part.id,
             service_date=service_date,
             title=part.part_type_id,
+            category=part.part_type_id,
+            status="completed",
         ))
     part.last_maintenance = service_date
     db.commit()
@@ -299,3 +353,40 @@ def confirm_deletion(payload: TokenConfirm, db: Session = Depends(get_db)):
         user.password_hash = "deleted"
         db.commit()
     return {"message": "Conta removida segundo a LGPD."}
+
+
+@router.post("/support/tickets", response_model=SupportTicketResponse, status_code=status.HTTP_201_CREATED)
+def create_support_ticket(
+    payload: SupportTicketCreate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    ticket = SupportTicket(
+        id=str(uuid4()),
+        user_id=user.id,
+        category=payload.category,
+        subject=payload.subject.strip(),
+        description=payload.description.strip(),
+        status="Open",
+    )
+    db.add(ticket)
+    db.commit()
+    db.refresh(ticket)
+    return ticket
+
+
+@router.get("/support/tickets", response_model=list[SupportTicketResponse])
+def list_support_tickets(
+    category: str | None = None,
+    status_filter: str | None = Query(default=None, alias="status"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    query = select(SupportTicket).where(SupportTicket.user_id == user.id)
+    if category:
+        query = query.where(SupportTicket.category == category)
+    if status_filter:
+        if status_filter not in {"Open", "In Progress", "Resolved"}:
+            raise HTTPException(status_code=422, detail="Invalid ticket status")
+        query = query.where(SupportTicket.status == status_filter)
+    return db.scalars(query.order_by(SupportTicket.created_at.desc())).all()

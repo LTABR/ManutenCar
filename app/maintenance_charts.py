@@ -46,9 +46,9 @@ class MaintenanceDeadline:
 
 
 _STATUS_COLORS: dict[MaintenanceStatus, str] = {
-    MaintenanceStatus.OVERDUE: "#dc2626",
-    MaintenanceStatus.SOON: "#d99a0b",
-    MaintenanceStatus.ON_TRACK: "#16a34a",
+    MaintenanceStatus.OVERDUE: "#DC2626",
+    MaintenanceStatus.SOON: "#DC2626",
+    MaintenanceStatus.ON_TRACK: "#16A34A",
 }
 
 
@@ -80,9 +80,9 @@ def _build_deadline_figure(deadlines: list[MaintenanceDeadline]) -> Figure:
     axis.barh(positions, values, color=colors, height=0.62, zorder=3)
     axis.set_yticks(positions, labels)
     axis.invert_yaxis()
-    axis.axvline(0, color="#475569", linewidth=1, zorder=2)
+    axis.axvline(0, color="#F36808", linewidth=1.5, zorder=2)
     axis.set_xlabel("Days until service (negative values are overdue)", color="#475569")
-    axis.set_title("Maintenance deadlines", loc="left", color="#0f172a", fontsize=14, weight="bold", pad=14)
+    axis.set_title("Maintenance deadlines", loc="left", color="#14325C", fontsize=14, weight="bold", pad=14)
     axis.xaxis.grid(True, color="#e2e8f0", linewidth=0.8, zorder=0)
     axis.tick_params(axis="y", length=0, labelcolor="#334155", labelsize=9)
     axis.tick_params(axis="x", colors="#64748b", labelsize=9)
@@ -115,7 +115,7 @@ def render_deadline_chart(deadlines: Iterable[MaintenanceDeadline]) -> BytesIO:
     figure = _build_deadline_figure(list(deadlines))
     output = BytesIO()
     try:
-        figure.savefig(output, format="png", dpi=160, bbox_inches="tight")
+        figure.savefig(output, format="png", dpi=220, bbox_inches="tight")
     finally:
         plt.close(figure)
     output.seek(0)

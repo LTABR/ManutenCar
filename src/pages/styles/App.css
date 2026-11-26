@@ -2,42 +2,43 @@
 
 :root {
   font-family: 'DM Sans', sans-serif;
-  color: #222b27;
-  background: #f5f6f2;
+  color: #14325C;
+  background: #F4F6F9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-optical-sizing: auto;
   font-weight: 400;
-  --green: #245e48;
-  --green-dark: #194b38;
-  --ink: #222b27;
-  --muted: #838b85;
-  --line: #e9ebe5;
-  --surface: #fff;
-  --field-bg: #fff;
-  --field-text: #4e5952;
-  --field-disabled: #f8f9f7;
-  --focus-border: #84a28e;
-  --focus-ring: #eef4ee;
+  --navy: #14325C;
+  --navy-deep: #0E2444;
+  --navy-light: #1E467A;
+  --orange: #F36808;
+  --orange-hover: #D95800;
+  --ink: #14325C;
+  --muted: #475569;
+  --line: #DCE3EC;
+  --surface: #FFFFFF;
+  --field-bg: #FFFFFF;
+  --field-text: #334155;
+  --field-disabled: #F4F6F9;
+  --focus-border: #F36808;
+  --focus-ring: #FFF1E7;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  color: #e4ebe5;
-  background: #151b18;
-  --green: #83b493;
-  --green-dark: #6e9f7c;
-  --ink: #e4ebe5;
-  --muted: #a2aea5;
-  --line: #37423b;
-  --surface: #202824;
-  --field-bg: #202824;
-  --field-text: #dce5dd;
-  --field-disabled: #29332d;
-  --focus-border: #83b493;
-  --focus-ring: #31473a;
+  color: #F4F6F9;
+  background: #0E2444;
+  --ink: #F4F6F9;
+  --muted: #CBD5E1;
+  --line: #1E467A;
+  --surface: #14325C;
+  --field-bg: #14325C;
+  --field-text: #F4F6F9;
+  --field-disabled: #0E2444;
+  --focus-border: #F36808;
+  --focus-ring: #1E467A;
 }
 
 * {
@@ -88,7 +89,7 @@ select:focus-visible {
   height: 79px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #e6e8e2;
+  border-bottom: 1px solid #E2E8F0;
 }
 
 .brand {
@@ -108,11 +109,11 @@ select:focus-visible {
   display: grid;
   place-items: center;
   color: white;
-  background: var(--green);
+  background: var(--orange);
 }
 
 .brand-period {
-  color: #d38b56;
+  color: #F36808;
 }
 
 .topbar-note {
@@ -120,7 +121,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #78817b;
+  color: #475569;
   font-size: 12px;
 }
 
@@ -128,8 +129,8 @@ select:focus-visible {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #72a486;
-  box-shadow: 0 0 0 3px #e5eee7;
+  background: #1E467A;
+  box-shadow: 0 0 0 3px #E7EDF5;
 }
 
 .topbar-link {
@@ -137,7 +138,7 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   margin-left: 0;
-  color: #525c56;
+  color: #475569;
   font-size: 12px;
   font-weight: 600;
 }
@@ -165,7 +166,7 @@ select:focus-visible {
 
 .preference-button:hover {
   border-color: var(--focus-border);
-  color: var(--green);
+  color: var(--orange);
 }
 
 .language-button {
@@ -174,7 +175,7 @@ select:focus-visible {
 }
 
 .topbar-link svg {
-  color: var(--green);
+  color: var(--orange);
 }
 
 .hero {
@@ -193,7 +194,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #77837a;
+  color: #475569;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 1.45px;
@@ -202,7 +203,7 @@ select:focus-visible {
 .eyebrow-line {
   width: 19px;
   height: 1px;
-  background: #a1b3a6;
+  background: #94A3B8;
 }
 
 .hero h1 {
@@ -215,13 +216,13 @@ select:focus-visible {
 }
 
 .hero h1 span {
-  color: var(--green);
+  color: var(--orange);
 }
 
 .hero-copy>p {
   max-width: 415px;
   margin: 0;
-  color: #727a74;
+  color: #475569;
   font-size: 14px;
   line-height: 1.8;
 }
@@ -231,12 +232,12 @@ select:focus-visible {
   align-items: center;
   gap: 9px;
   margin-top: 24px;
-  color: #747c76;
+  color: #475569;
   font-size: 11px;
 }
 
 .footnote-icon {
-  color: #c28c59;
+  color: #F36808;
   display: flex;
 }
 
@@ -245,7 +246,7 @@ select:focus-visible {
   height: 280px;
   overflow: hidden;
   border-radius: 9px;
-  background: #e9eee8;
+  background: #E2E8F0;
 }
 
 .art-circle {
@@ -258,7 +259,7 @@ select:focus-visible {
   height: 259px;
   right: 61px;
   top: -86px;
-  background: #dce7dc;
+  background: #E7EDF5;
 }
 
 .art-circle-front {
@@ -266,7 +267,7 @@ select:focus-visible {
   height: 208px;
   right: -56px;
   bottom: -95px;
-  border: 1px solid #d3e0d4;
+  border: 1px solid #E7EDF5;
 }
 
 .art-label {
@@ -276,7 +277,7 @@ select:focus-visible {
   display: flex;
   gap: 7px;
   align-items: center;
-  color: #758277;
+  color: #475569;
   font-size: 8px;
   letter-spacing: 1.2px;
   font-weight: 700;
@@ -285,7 +286,7 @@ select:focus-visible {
 .art-label-dot {
   width: 6px;
   height: 6px;
-  background: #749780;
+  background: #94A3B8;
   border-radius: 50%;
 }
 
@@ -294,7 +295,7 @@ select:focus-visible {
   top: 66px;
   left: 50%;
   transform: translateX(-50%);
-  color: var(--green);
+  color: var(--orange);
 }
 
 .art-road {
@@ -303,7 +304,7 @@ select:focus-visible {
   width: 74%;
   bottom: 71px;
   left: 13%;
-  background: #bdcabe;
+  background: #94A3B8;
 }
 
 .art-card {
@@ -317,10 +318,10 @@ select:focus-visible {
   align-items: center;
   gap: 10px;
   padding: 9px 11px;
-  border: 1px solid #e9ede6;
+  border: 1px solid #E7EDF5;
   border-radius: 7px;
   background: #fff;
-  box-shadow: 0 7px 20px #24473412;
+  box-shadow: 0 7px 20px #14325C12;
 }
 
 .art-card-icon {
@@ -329,8 +330,8 @@ select:focus-visible {
   width: 35px;
   height: 35px;
   border-radius: 7px;
-  color: var(--green);
-  background: #edf3ed;
+  color: var(--orange);
+  background: #E7EDF5;
 }
 
 .art-card strong,
@@ -345,7 +346,7 @@ select:focus-visible {
 
 .art-card small {
   margin-top: 2px;
-  color: #89928b;
+  color: #94A3B8;
   font-size: 9px;
 }
 
@@ -356,8 +357,8 @@ select:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #4d805e;
-  background: #edf4ed;
+  color: #14325C;
+  background: #E7EDF5;
   font-size: 11px;
 }
 
@@ -385,9 +386,9 @@ select:focus-visible {
   height: 39px;
   display: grid;
   place-items: center;
-  color: var(--green);
+  color: var(--orange);
   border-radius: 8px;
-  background: #eff4ef;
+  background: #E7EDF5;
 }
 
 .card-heading h2,
@@ -414,7 +415,7 @@ select:focus-visible {
   align-items: center;
   gap: 2px;
   padding: 1px 3px 1px 1px;
-  border: 1px solid #e9ede7;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
 }
 
@@ -426,9 +427,9 @@ select:focus-visible {
   align-items: center;
   gap: 6px;
   padding: 0 9px;
-  border: 1px solid #e9ede7;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
-  color: #758078;
+  color: #475569;
   background: #fff;
   font-size: 9px;
   white-space: nowrap;
@@ -442,12 +443,12 @@ select:focus-visible {
 
 .garage-car-tab.active {
   border-color: transparent;
-  color: var(--green);
-  background: #f2f7f1;
+  color: var(--orange);
+  background: #E7EDF5;
 }
 
 .garage-car-item.active {
-  border-color: #bfd1c1;
+  border-color: #E7EDF5;
 }
 
 .garage-car-item .garage-car-tab {
@@ -469,7 +470,7 @@ select:focus-visible {
 
 .garage-add-car {
   border-style: dashed;
-  color: var(--green);
+  color: var(--orange);
 }
 
 .garage-add-car:disabled {
@@ -495,8 +496,8 @@ select:focus-visible {
 
 .date-input:focus,
 .input-with-icon:focus-within {
-  border-color: #84a28e;
-  box-shadow: 0 0 0 3px #eef4ee;
+  border-color: #94A3B8;
+  box-shadow: 0 0 0 3px #E7EDF5;
 }
 
 .select-chevron {
@@ -505,20 +506,20 @@ select:focus-visible {
   right: 11px;
   display: flex;
   transform: translateY(-50%) rotate(90deg);
-  color: #929b94;
+  color: #94A3B8;
   pointer-events: none;
 }
 
 .field-hint {
   display: block;
   margin-top: 6px;
-  color: #9aa19e;
+  color: #94A3B8;
   font-size: 9px;
 }
 
 .field-warning {
   margin: 6px 0 0;
-  color: #a87532;
+  color: #F36808;
   font-size: 9px;
 }
 
@@ -539,9 +540,9 @@ select:focus-visible {
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  border: 1px solid #e8ebe5;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
-  color: #849188;
+  color: #94A3B8;
 }
 
 .input-with-icon input {
@@ -549,18 +550,18 @@ select:focus-visible {
   min-width: 0;
   border: 0;
   outline: 0;
-  color: #4e5952;
+  color: #475569;
   background: transparent;
   font-size: 11px;
 }
 
 .input-with-icon>span {
-  color: #929a94;
+  color: #94A3B8;
   font-size: 10px;
 }
 
 .per-label {
-  color: #969d97;
+  color: #94A3B8;
   font-size: 10px;
 }
 
@@ -570,8 +571,8 @@ select:focus-visible {
   justify-content: space-between;
   margin: 22px 0 11px;
   padding-top: 15px;
-  border-top: 1px solid #eff0ec;
-  color: #819087;
+  border-top: 1px solid #E2E8F0;
+  color: #94A3B8;
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 1.15px;
@@ -580,8 +581,8 @@ select:focus-visible {
 .parts-count {
   padding: 4px 7px;
   border-radius: 10px;
-  background: #f2f4f0;
-  color: #778078;
+  background: #E2E8F0;
+  color: #475569;
   font-size: 9px;
   letter-spacing: 0;
 }
@@ -605,14 +606,14 @@ select:focus-visible {
   border: 0;
   border-radius: 5px;
   color: #fff;
-  background: var(--green);
+  background: var(--orange);
   font-size: 10px;
   font-weight: 700;
   transition: background .2s;
 }
 
 .add-button:hover:not(:disabled) {
-  background: var(--green-dark);
+  background: var(--orange-hover);
 }
 
 .add-button:disabled {
@@ -622,7 +623,7 @@ select:focus-visible {
 
 .form-error {
   margin: 7px 0 0;
-  color: #b84d43;
+  color: #1E467A;
   font-size: 10px;
 }
 
@@ -633,15 +634,15 @@ select:focus-visible {
   gap: 10px;
   margin-top: 10px;
   padding: 11px;
-  border: 1px dashed #e6e9e2;
+  border: 1px dashed #E2E8F0;
   border-radius: 5px;
-  color: #8b948d;
+  color: #94A3B8;
   font-size: 10px;
   line-height: 1.6;
 }
 
 .empty-parts strong {
-  color: #657269;
+  color: #475569;
   font-weight: 600;
 }
 
@@ -652,8 +653,8 @@ select:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  color: #839489;
-  background: #f2f5f1;
+  color: #94A3B8;
+  background: #E7EDF5;
 }
 
 .tracked-parts {
@@ -669,7 +670,7 @@ select:focus-visible {
   gap: 8px;
   min-height: 53px;
   padding: 7px 8px;
-  border: 1px solid #edf0ea;
+  border: 1px solid #E7EDF5;
   border-radius: 6px;
 }
 
@@ -692,7 +693,7 @@ select:focus-visible {
 
 .tracked-part-info span {
   margin-top: 4px;
-  color: #8a948d;
+  color: #94A3B8;
   font-size: 8px;
 }
 
@@ -701,7 +702,7 @@ select:focus-visible {
 }
 
 .last-service-label {
-  color: #89938d;
+  color: #94A3B8;
   font-size: 7px;
   font-weight: 700;
   letter-spacing: .7px;
@@ -713,10 +714,10 @@ select:focus-visible {
   min-width: 0;
   height: 29px;
   padding: 0 6px;
-  border: 1px solid #edf0ea;
+  border: 1px solid #E7EDF5;
   border-radius: 4px;
   outline: 0;
-  color: #657269;
+  color: #475569;
   background: #fff;
   font-size: 9px;
 }
@@ -725,7 +726,7 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   padding: 23px 24px 16px;
-  background: #fcfdfb;
+  background: #E7EDF5;
 }
 
 .schedule-header {
@@ -744,12 +745,12 @@ select:focus-visible {
   align-items: center;
   gap: 5px;
   margin: 6px 0 0;
-  color: #87918a;
+  color: #94A3B8;
   font-size: 10px;
 }
 
 .schedule-header p svg {
-  color: var(--green);
+  color: var(--orange);
 }
 
 .schedule-filters {
@@ -762,7 +763,7 @@ select:focus-visible {
 .schedule-filters label {
   display: grid;
   gap: 5px;
-  color: #839087;
+  color: #94A3B8;
   font-size: 8px;
   font-weight: 700;
 }
@@ -772,17 +773,17 @@ select:focus-visible {
   min-width: 0;
   height: 34px;
   padding: 0 9px;
-  border: 1px solid #e8ebe5;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
   outline: 0;
-  color: #4e5952;
+  color: #475569;
   background: #fff;
   font-size: 10px;
 }
 
 .schedule-filters select:focus {
-  border-color: #84a28e;
-  box-shadow: 0 0 0 3px #eef4ee;
+  border-color: #94A3B8;
+  box-shadow: 0 0 0 3px #E7EDF5;
 }
 
 .schedule-pagination {
@@ -796,7 +797,7 @@ select:focus-visible {
 .schedule-pagination label {
   display: grid;
   gap: 5px;
-  color: #839087;
+  color: #94A3B8;
   font-size: 8px;
   font-weight: 700;
 }
@@ -804,9 +805,9 @@ select:focus-visible {
 .schedule-pagination select {
   height: 30px;
   padding: 0 8px;
-  border: 1px solid #e8ebe5;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
-  color: #4e5952;
+  color: #475569;
   background: #fff;
   font-size: 10px;
 }
@@ -815,23 +816,23 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #839087;
+  color: #94A3B8;
   font-size: 9px;
 }
 
 .schedule-page-controls button {
   padding: 6px 8px;
-  border: 1px solid #e8ebe5;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
-  color: #4e5952;
+  color: #475569;
   background: #fff;
   font-size: 9px;
   cursor: pointer;
 }
 
 .schedule-page-controls button:disabled {
-  color: #a0a7a1;
-  background: #f8f9f7;
+  color: #94A3B8;
+  background: #E2E8F0;
   cursor: not-allowed;
 }
 
@@ -840,10 +841,10 @@ select:focus-visible {
   height: 31px;
   display: grid;
   place-items: center;
-  border: 1px solid #e9eee8;
+  border: 1px solid #E2E8F0;
   border-radius: 7px;
-  color: #61856b;
-  background: #f3f7f2;
+  color: #475569;
+  background: #E7EDF5;
 }
 
 .summary-strip {
@@ -852,9 +853,9 @@ select:focus-visible {
   gap: 10px;
   margin-top: 17px;
   padding: 10px 11px;
-  border: 1px solid #e8eee7;
+  border: 1px solid #E7EDF5;
   border-radius: 6px;
-  background: #f7faf6;
+  background: #E7EDF5;
 }
 
 .summary-icon {
@@ -863,8 +864,8 @@ select:focus-visible {
   width: 31px;
   height: 31px;
   border-radius: 6px;
-  color: #4e7c5b;
-  background: #eaf2e9;
+  color: #14325C;
+  background: #E7EDF5;
 }
 
 .summary-strip>span:nth-child(2) {
@@ -883,7 +884,7 @@ select:focus-visible {
 
 .summary-strip small {
   margin-top: 3px;
-  color: #869189;
+  color: #94A3B8;
   font-size: 8px;
 }
 
@@ -897,14 +898,14 @@ select:focus-visible {
   white-space: nowrap;
 }
 
-.badge-green {
-  color: #4c7957;
-  background: #e9f2e8;
+.badge-clear {
+  color: #14325C;
+  background: #E7EDF5;
 }
 
 .badge-amber {
-  color: #997240;
-  background: #f8f0e3;
+  color: #F36808;
+  background: #FFF1E7;
 }
 
 .schedule-list {
@@ -917,7 +918,7 @@ select:focus-visible {
   align-items: center;
   gap: 9px;
   min-height: 59px;
-  border-bottom: 1px solid #eef0eb;
+  border-bottom: 1px solid #E2E8F0;
 }
 
 .schedule-item-main {
@@ -944,15 +945,15 @@ select:focus-visible {
   height: 6px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #76a180;
+  background: #1E467A;
 }
 
 .status-dot.soon {
-  background: #d4a15c;
+  background: #F36808;
 }
 
 .status-dot.overdue {
-  background: #c77668;
+  background: #1E467A;
 }
 
 .schedule-item-detail {
@@ -960,7 +961,7 @@ select:focus-visible {
   align-items: center;
   gap: 5px;
   margin-top: 6px;
-  color: #929a94;
+  color: #94A3B8;
   font-size: 8px;
 }
 
@@ -969,12 +970,12 @@ select:focus-visible {
   align-items: center;
   gap: 4px;
   margin-top: 4px;
-  color: #75877a;
+  color: #475569;
   font-size: 8px;
 }
 
 .schedule-car-name svg {
-  color: var(--green);
+  color: var(--orange);
 }
 
 .schedule-item-date {
@@ -988,18 +989,18 @@ select:focus-visible {
 }
 
 .schedule-item-date strong {
-  color: #4b7253;
+  color: #14325C;
   font-size: 9px;
   font-weight: 700;
 }
 
 .schedule-item-date strong.overdue-text {
-  color: #b65f53;
+  color: #1E467A;
 }
 
 .schedule-item-date span {
   margin-top: 4px;
-  color: #a0a7a1;
+  color: #94A3B8;
   font-size: 7px;
 }
 
@@ -1013,10 +1014,10 @@ select:focus-visible {
 .schedule-maintain-button {
   max-width: 94px;
   padding: 5px 7px;
-  border: 1px solid #c9dccb;
+  border: 1px solid #E7EDF5;
   border-radius: 5px;
-  color: #4f7b58;
-  background: #f1f7f1;
+  color: #14325C;
+  background: #E7EDF5;
   font-size: 7px;
   font-weight: 700;
   line-height: 1.15;
@@ -1024,8 +1025,8 @@ select:focus-visible {
 }
 
 .schedule-maintain-button:hover:not(:disabled) {
-  border-color: #9fbea3;
-  background: #e7f1e7;
+  border-color: #1E467A;
+  background: #E7EDF5;
 }
 
 .schedule-maintain-button:disabled {
@@ -1035,7 +1036,7 @@ select:focus-visible {
 
 .schedule-maintain-error {
   max-width: 94px;
-  color: #b84d43;
+  color: #1E467A;
   font-size: 7px;
   line-height: 1.1;
   text-align: right;
@@ -1062,9 +1063,9 @@ select:focus-visible {
   place-items: center;
   width: 15px;
   height: 15px;
-  border: 1px solid #dce3dc;
+  border: 1px solid #E2E8F0;
   border-radius: 50%;
-  color: #829087;
+  color: #94A3B8;
   font-family: Georgia, serif;
   font-size: 9px;
   font-style: italic;
@@ -1077,11 +1078,11 @@ select:focus-visible {
   bottom: 24px;
   width: 180px;
   padding: 9px 10px;
-  border: 1px solid #e5eae3;
+  border: 1px solid #E2E8F0;
   border-radius: 5px;
-  color: #69756c;
+  color: #475569;
   background: #fff;
-  box-shadow: 0 5px 20px #1c392013;
+  box-shadow: 0 5px 20px #0E244413;
   font-size: 9px;
   line-height: 1.8;
 }
@@ -1091,7 +1092,7 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   margin-top: 11px;
-  color: #929b94;
+  color: #94A3B8;
   font-size: 8px;
   line-height: 1.5;
 }
@@ -1118,7 +1119,7 @@ select:focus-visible {
   min-height: 140px;
   display: grid;
   place-items: center;
-  color: #849087;
+  color: #94A3B8;
   font-size: 11px;
   text-align: center;
 }
@@ -1129,10 +1130,10 @@ select:focus-visible {
   height: 48px;
   display: grid;
   place-items: center;
-  border: 1px solid #e6ece5;
+  border: 1px solid #E2E8F0;
   border-radius: 13px;
-  color: #66816d;
-  background: #f1f5f0;
+  color: #475569;
+  background: #E7EDF5;
 }
 
 .calendar-plus {
@@ -1143,10 +1144,10 @@ select:focus-visible {
   height: 18px;
   display: grid;
   place-items: center;
-  border: 2px solid #fcfdfb;
+  border: 2px solid #E7EDF5;
   border-radius: 50%;
   color: white;
-  background: #558163;
+  background: #14325C;
   font-size: 12px;
 }
 
@@ -1162,7 +1163,7 @@ select:focus-visible {
 .schedule-empty>p {
   max-width: 278px;
   margin: 0;
-  color: #89928c;
+  color: #94A3B8;
   font-size: 10px;
   line-height: 1.7;
 }
@@ -1172,7 +1173,7 @@ select:focus-visible {
   align-items: center;
   gap: 8px;
   margin-top: 22px;
-  color: #77837a;
+  color: #475569;
   font-size: 8px;
   white-space: nowrap;
 }
@@ -1184,7 +1185,7 @@ select:focus-visible {
 }
 
 .empty-steps i {
-  color: #74917a;
+  color: #475569;
   font-size: 8px;
   font-style: normal;
   font-weight: 700;
@@ -1193,7 +1194,7 @@ select:focus-visible {
 .step-line {
   width: 13px;
   height: 1px;
-  background: #dce3db;
+  background: #E2E8F0;
 }
 
 .schedule-footer {
@@ -1201,13 +1202,13 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   padding-top: 12px;
-  border-top: 1px solid #edf0eb;
-  color: #849087;
+  border-top: 1px solid #E2E8F0;
+  color: #94A3B8;
   font-size: 9px;
 }
 
 .footer-leaf {
-  color: #7b9a7e;
+  color: #94A3B8;
   font-size: 12px;
 }
 
@@ -1217,7 +1218,7 @@ select:focus-visible {
   justify-content: space-between;
   gap: 35px;
   padding: 22px 0 31px;
-  border-top: 1px solid #e7e9e3;
+  border-top: 1px solid #E2E8F0;
 }
 
 .how-section h2 {
@@ -1231,7 +1232,7 @@ select:focus-visible {
 .how-section>p {
   max-width: 440px;
   margin: 0;
-  color: #818982;
+  color: #94A3B8;
   font-size: 10px;
   line-height: 1.8;
 }
@@ -1241,13 +1242,13 @@ select:focus-visible {
   justify-content: space-between;
   align-items: center;
   padding: 17px 0 23px;
-  border-top: 1px solid #e7e9e3;
-  color: #89928c;
+  border-top: 1px solid #E2E8F0;
+  color: #94A3B8;
   font-size: 9px;
 }
 
 .page-footer>span:first-child {
-  color: #536159;
+  color: #475569;
   font-family: Manrope, sans-serif;
   font-size: 12px;
   font-weight: 800;
@@ -1415,19 +1416,19 @@ select:focus-visible {
 }
 
 :root[data-theme='dark'] body {
-  color: #e4ebe5;
+  color: #E2E8F0;
 }
 
 :root[data-theme='dark'] .topbar {
-  border-color: #37423b;
+  border-color: #334155;
 }
 
 :root[data-theme='dark'] .brand-mark {
-  background: #245e48;
+  background: #14325C;
 }
 
 :root[data-theme='dark'] .topbar-link {
-  color: #c4d0c7;
+  color: #E2E8F0;
 }
 
 :root[data-theme='dark'] .parts-divider,
@@ -1435,43 +1436,43 @@ select:focus-visible {
 :root[data-theme='dark'] .last-service-label,
 :root[data-theme='dark'] .tracked-part-info span,
 :root[data-theme='dark'] .select-chevron {
-  color: #a2aea5;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .hero-copy > p,
 :root[data-theme='dark'] .hero-footnote,
 :root[data-theme='dark'] .topbar-note,
 :root[data-theme='dark'] .how-section > p {
-  color: #aab6ad;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .hero-art {
-  background: #26352c;
+  background: #0E2444;
 }
 
 :root[data-theme='dark'] .art-circle-back {
-  background: #304638;
+  background: #14325C;
 }
 
 :root[data-theme='dark'] .art-circle-front {
-  border-color: #405847;
+  border-color: #475569;
 }
 
 :root[data-theme='dark'] .art-label {
-  color: #b3c4b6;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .art-road {
-  background: #59715f;
+  background: #475569;
 }
 
 :root[data-theme='dark'] .art-card,
 :root[data-theme='dark'] .setup-card,
 :root[data-theme='dark'] .schedule-card,
 :root[data-theme='dark'] .details-popover {
-  border-color: #37423b;
-  color: #e4ebe5;
-  background: #202824;
+  border-color: #334155;
+  color: #E2E8F0;
+  background: #334155;
 }
 
 .vehicle-maintenance {
@@ -1516,8 +1517,8 @@ select:focus-visible {
   place-items: center;
   flex: 0 0 auto;
   border-radius: 8px;
-  color: var(--green);
-  background: #eff4ef;
+  color: var(--orange);
+  background: #E7EDF5;
 }
 
 .maintenance-chart-image-wrap {
@@ -1563,7 +1564,7 @@ select:focus-visible {
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  color: var(--green);
+  color: var(--orange);
   background: var(--surface);
   font-size: 11px;
   font-weight: 700;
@@ -1571,7 +1572,7 @@ select:focus-visible {
 
 .maintenance-feedback button:hover,
 .maintenance-history-pagination button:hover:not(:disabled) {
-  border-color: var(--green);
+  border-color: var(--orange);
 }
 
 .maintenance-feedback button:disabled,
@@ -1581,9 +1582,9 @@ select:focus-visible {
 }
 
 .maintenance-error {
-  border-color: #efc8c4;
-  color: #a63e36;
-  background: #fff9f8;
+  border-color: #E7EDF5;
+  color: #1E467A;
+  background: #E7EDF5;
 }
 
 .maintenance-total {
@@ -1664,7 +1665,7 @@ select:focus-visible {
   align-items: flex-start;
   gap: 7px;
   padding-top: 2px;
-  color: var(--green);
+  color: var(--orange);
   font-size: 11px;
   font-weight: 700;
 }
@@ -1723,23 +1724,23 @@ select:focus-visible {
 }
 
 .maintenance-status-success {
-  color: #237044;
-  background: #e8f5ec;
+  color: #15803D;
+  background: #DCFCE7;
 }
 
 .maintenance-status-warning {
-  color: #91620a;
-  background: #fff4d8;
+  color: #B91C1C;
+  background: #FEE2E2;
 }
 
 .maintenance-status-danger {
-  color: #ad3731;
-  background: #fde9e7;
+  color: #B91C1C;
+  background: #FEE2E2;
 }
 
 .maintenance-status-neutral {
-  color: #667085;
-  background: #eef1f4;
+  color: #475569;
+  background: #E7EDF5;
 }
 
 .maintenance-history-pagination {
@@ -1775,7 +1776,7 @@ select:focus-visible {
   display: block;
   height: 17px;
   border-radius: 4px;
-  background: linear-gradient(90deg, #edf0ec, #f8f9f7, #edf0ec);
+  background: linear-gradient(90deg, #E2E8F0, #E2E8F0, #E2E8F0);
   background-size: 200% 100%;
   animation: maintenance-shimmer 1.3s ease-in-out infinite;
 }
@@ -1800,8 +1801,8 @@ select:focus-visible {
 }
 
 :root[data-theme='dark'] .maintenance-heading-icon {
-  color: #9bc6a5;
-  background: #2a3a30;
+  color: #1E467A;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .maintenance-chart-image-wrap {
@@ -1809,34 +1810,34 @@ select:focus-visible {
 }
 
 :root[data-theme='dark'] .maintenance-error {
-  border-color: #69413e;
-  color: #f0aaa3;
-  background: #392927;
+  border-color: #14325C;
+  color: #E7EDF5;
+  background: #14325C;
 }
 
 :root[data-theme='dark'] .maintenance-status-success {
-  color: #9ad2a8;
-  background: #263d2e;
+  color: #DCFCE7;
+  background: #166534;
 }
 
 :root[data-theme='dark'] .maintenance-status-warning {
-  color: #e6c36f;
-  background: #433920;
+  color: #FEE2E2;
+  background: #991B1B;
 }
 
 :root[data-theme='dark'] .maintenance-status-danger {
-  color: #f0a39d;
-  background: #482d2b;
+  color: #FEE2E2;
+  background: #991B1B;
 }
 
 :root[data-theme='dark'] .maintenance-status-neutral {
-  color: #c1c8d0;
-  background: #343c45;
+  color: #E2E8F0;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .maintenance-chart-skeleton span,
 :root[data-theme='dark'] .maintenance-history-skeleton span {
-  background: linear-gradient(90deg, #303a34, #3a453e, #303a34);
+  background: linear-gradient(90deg, #334155, #334155, #334155);
   background-size: 200% 100%;
 }
 
@@ -1898,7 +1899,7 @@ select:focus-visible {
 }
 
 :root[data-theme='dark'] .art-card {
-  box-shadow: 0 7px 20px #0005;
+  box-shadow: 0 7px 20px #33415555;
 }
 
 :root[data-theme='dark'] .art-card-icon,
@@ -1907,8 +1908,8 @@ select:focus-visible {
 :root[data-theme='dark'] .schedule-spark,
 :root[data-theme='dark'] .empty-icon,
 :root[data-theme='dark'] .empty-calendar {
-  color: #9bc6a5;
-  background: #2a3a30;
+  color: #1E467A;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .art-card small,
@@ -1920,7 +1921,7 @@ select:focus-visible {
 :root[data-theme='dark'] .schedule-empty > p,
 :root[data-theme='dark'] .page-footer,
 :root[data-theme='dark'] .schedule-no-results {
-  color: #a2aea5;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .garage-car-tab,
@@ -1930,27 +1931,27 @@ select:focus-visible {
 :root[data-theme='dark'] .schedule-filters select,
 :root[data-theme='dark'] .schedule-pagination select,
 :root[data-theme='dark'] .schedule-page-controls button {
-  border-color: #3b4840;
-  color: #dce5dd;
-  background: #202824;
+  border-color: #475569;
+  color: #E2E8F0;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .garage-car-tab.active {
-  border-color: #58745f;
-  color: #a5d0ad;
-  background: #2a3a30;
+  border-color: #475569;
+  color: #E7EDF5;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .garage-car-item {
-  border-color: #3b4840;
+  border-color: #475569;
 }
 
 :root[data-theme='dark'] .garage-car-item.active {
-  border-color: #58745f;
+  border-color: #475569;
 }
 
 :root[data-theme='dark'] .input-with-icon input {
-  color: #dce5dd;
+  color: #E2E8F0;
 }
 
 :root[data-theme='dark'] .parts-divider,
@@ -1959,93 +1960,93 @@ select:focus-visible {
 :root[data-theme='dark'] .schedule-footer,
 :root[data-theme='dark'] .how-section,
 :root[data-theme='dark'] .page-footer {
-  border-color: #37423b;
+  border-color: #334155;
 }
 
 :root[data-theme='dark'] .parts-count {
-  color: #b4c0b6;
-  background: #2a332d;
+  color: #94A3B8;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .empty-parts {
-  border-color: #3b4840;
-  color: #a2aea5;
+  border-color: #475569;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .empty-parts strong,
 :root[data-theme='dark'] .page-footer > span:first-child {
-  color: #d0dbd2;
+  color: #E2E8F0;
 }
 
 :root[data-theme='dark'] .schedule-filters label,
 :root[data-theme='dark'] .schedule-pagination label,
 :root[data-theme='dark'] .schedule-page-controls {
-  color: #a2aea5;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .schedule-page-controls button:disabled {
-  color: #89968c;
-  background: #29332d;
+  color: #94A3B8;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .summary-strip {
-  border-color: #3b4a3e;
-  background: #25332a;
+  border-color: #475569;
+  background: #334155;
 }
 
 :root[data-theme='dark'] .summary-icon {
-  color: #a6d1ad;
+  color: #E7EDF5;
 }
 
 :root[data-theme='dark'] .summary-strip small {
-  color: #aab6ad;
+  color: #94A3B8;
 }
 
-:root[data-theme='dark'] .badge-green {
-  color: #b8ddbd;
-  background: #304738;
+:root[data-theme='dark'] .badge-clear {
+  color: #E7EDF5;
+  background: #14325C;
 }
 
 :root[data-theme='dark'] .badge-amber {
-  color: #e4c38f;
-  background: #493a27;
+  color: #FFF1E7;
+  background: #D95800;
 }
 
 :root[data-theme='dark'] .schedule-car-name {
-  color: #a8bcae;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .schedule-item-date strong {
-  color: #a5d0ad;
+  color: #E7EDF5;
 }
 
 :root[data-theme='dark'] .schedule-maintain-button {
-  border-color: #526e57;
-  color: #b8dbbd;
-  background: #2a3d2e;
+  border-color: #475569;
+  color: #E7EDF5;
+  background: #14325C;
 }
 
 :root[data-theme='dark'] .details-popover,
 :root[data-theme='dark'] .schedule-page-controls button {
-  box-shadow: 0 5px 20px #0005;
+  box-shadow: 0 5px 20px #33415555;
 }
 
 :root[data-theme='dark'] .schedule-details summary span,
 :root[data-theme='dark'] .note-info {
-  border-color: #526158;
-  color: #b0bdb3;
+  border-color: #475569;
+  color: #94A3B8;
 }
 
 :root[data-theme='dark'] .calendar-plus {
-  border-color: #202824;
+  border-color: #334155;
 }
 
 :root[data-theme='dark'] .step-line {
-  background: #46554a;
+  background: #475569;
 }
 
 :root[data-theme='dark'] .field-warning {
-  color: #e3bd7d;
+  color: #F36808;
 
   .setup-card,
   .schedule-card {
@@ -2097,8 +2098,8 @@ select:focus-visible {
 }
 
 .logout-button:hover {
-  border-color: #d5a47c;
-  color: #a45d35;
+  border-color: #F36808;
+  color: #F36808;
 }
 
 .login-page {
@@ -2108,10 +2109,10 @@ select:focus-visible {
   min-height: min(690px, calc(100vh - 48px));
   margin: 24px auto;
   overflow: hidden;
-  border: 1px solid #e0e7df;
+  border: 1px solid #E2E8F0;
   border-radius: 18px;
   background: var(--surface);
-  box-shadow: 0 20px 60px #214a3420;
+  box-shadow: 0 20px 60px #14325C20;
 }
 
 .login-panel {
@@ -2136,14 +2137,14 @@ select:focus-visible {
   height: 40px;
   margin-bottom: 22px;
   border-radius: 11px;
-  color: var(--green);
-  background: #edf4ed;
+  color: var(--orange);
+  background: #E7EDF5;
 }
 
 .login-heading p,
 .login-aside-copy > span {
   margin: 0 0 10px;
-  color: #779281;
+  color: #475569;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -2197,7 +2198,7 @@ select:focus-visible {
 
 .login-error {
   margin: -4px 0 0;
-  color: #b84d43;
+  color: #1E467A;
   font-size: 11px;
 }
 
@@ -2211,12 +2212,12 @@ select:focus-visible {
   border: 0;
   border-radius: 7px;
   color: #fff;
-  background: var(--green);
+  background: var(--orange);
   font-size: 13px;
   font-weight: 700;
 }
 
-.login-submit:hover:not(:disabled) { background: var(--green-dark); }
+.login-submit:hover:not(:disabled) { background: var(--orange-hover); }
 .login-submit:disabled { cursor: wait; opacity: .65; }
 
 .login-mode-switch {
@@ -2229,13 +2230,13 @@ select:focus-visible {
 .login-mode-switch button {
   padding: 0;
   border: 0;
-  color: var(--green);
+  color: var(--orange);
   background: transparent;
   font-size: inherit;
   font-weight: 700;
 }
 
-.login-mode-switch button:hover:not(:disabled) { color: var(--green-dark); }
+.login-mode-switch button:hover:not(:disabled) { color: var(--orange-hover); }
 .login-mode-switch button:disabled { cursor: wait; opacity: .65; }
 
 .login-security-note {
@@ -2248,7 +2249,7 @@ select:focus-visible {
   font-size: 10px;
 }
 
-.login-security-note svg { color: var(--green); }
+.login-security-note svg { color: var(--orange); }
 
 .login-aside {
   position: relative;
@@ -2256,7 +2257,7 @@ select:focus-visible {
   place-items: center;
   overflow: hidden;
   color: #fff;
-  background: #245e48;
+  background: #14325C;
 }
 
 .login-orb {
@@ -2265,9 +2266,9 @@ select:focus-visible {
   border: 1px solid #ffffff22;
 }
 
-.login-orb-one { width: 560px; height: 560px; top: -220px; right: -145px; background: #39735a; }
-.login-orb-two { width: 405px; height: 405px; bottom: -190px; left: -170px; background: #1a4e3a; }
-.login-car { position: relative; z-index: 1; color: #dcebdd; filter: drop-shadow(0 18px 16px #153d2b66); }
+.login-orb-one { width: 560px; height: 560px; top: -220px; right: -145px; background: #14325C; }
+.login-orb-two { width: 405px; height: 405px; bottom: -190px; left: -170px; background: #14325C; }
+.login-car { position: relative; z-index: 1; color: #E7EDF5; filter: drop-shadow(0 18px 16px #0E244466); }
 
 .login-aside-copy {
   position: absolute;
@@ -2276,11 +2277,11 @@ select:focus-visible {
   bottom: clamp(35px, 7vw, 72px);
 }
 
-.login-aside-copy > span { display: block; color: #c2ddc9; }
+.login-aside-copy > span { display: block; color: #E7EDF5; }
 .login-aside-copy strong { font-family: Manrope, sans-serif; font-size: clamp(27px, 3vw, 40px); line-height: 1.08; letter-spacing: -1.8px; }
 
-:root[data-theme='dark'] .login-page { border-color: #37423b; box-shadow: 0 20px 60px #0006; }
-:root[data-theme='dark'] .login-security-icon { background: #2a3a30; }
+:root[data-theme='dark'] .login-page { border-color: #334155; box-shadow: 0 20px 60px #33415566; }
+:root[data-theme='dark'] .login-security-icon { background: #334155; }
 
 @media (max-width: 720px) {
   .login-page { grid-template-columns: 1fr; width: min(480px, calc(100% - 28px)); min-height: calc(100vh - 28px); margin: 14px auto; }
@@ -2289,4 +2290,176 @@ select:focus-visible {
   .login-aside { display: none; }
   .logout-button span { display: none; }
   .logout-button { padding: 0 8px; }
+}
+
+/* ManutenCar official brand palette */
+:root {
+  --navy: #14325C;
+  --orange: #F36808;
+  --app-bg: #F4F6F9;
+  --orange-hover: #D95800;
+  background: var(--app-bg);
+  --ink: #14325C;
+  --muted: #475569;
+  --line: #DCE3EC;
+  --surface: #FFFFFF;
+  --field-bg: #FFFFFF;
+  --field-text: #14325C;
+  --focus-border: #F36808;
+  --focus-ring: #FFF1E7;
+}
+.topbar { background: var(--navy); border-bottom: 0; color: #fff; }
+.topbar .brand { color: #fff; }
+.brand-logo, .login-logo { height: 44px; width: auto; border-radius: 12px; object-fit: cover; background: #14325C; }
+.topbar-note, .topbar-link { color: #E7EDF5; }
+.topbar-link svg { color: #F36808; }
+.live-dot { background: #F36808; box-shadow: 0 0 0 3px #FFF1E7; }
+.preference-button { color: #14325C; border-color: #DCE3EC; }
+.preference-button:hover { color: #F36808; border-color: #F36808; }
+.support-nav-button { height: 34px; border: 1px solid #F36808; border-radius: 6px; background: transparent; color: #fff; font-size: 11px; font-weight: 700; padding: 0 12px; }
+.support-nav-button.active, .support-nav-button:hover { background: #F36808; }
+.logout-button { color: #14325C; background: #fff; border: 0; }
+.hero h1 span, .art-car, .heading-icon, .garage-add-car { color: #F36808; }
+.brand-period { color: #F36808; }
+.login-submit, .support-form button { background: #F36808; color: #fff; border: 0; }
+.login-submit:hover, .support-form button:hover { background: #D95800; }
+.hero-art, .heading-icon { background: #E7EDF5; }
+.hero-art { border: 1px solid #DCE3EC; }
+.art-circle-back { background: #E7EDF5; }
+.art-circle-front { border-color: #E7EDF5; }
+.art-road { background: #E7EDF5; }
+.login-page { background: #fff; }
+.login-aside { background: #14325C; }
+.login-heading p, .login-security-icon { color: #F36808; }
+.support-center { padding: 38px 0 64px; }
+.support-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.support-logo { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; }
+.support-kicker { color: #F36808; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+.support-heading h1 { margin: 4px 0; color: #14325C; }
+.support-layout { display: grid; grid-template-columns: minmax(220px, .35fr) minmax(0, .65fr); gap: 18px; }
+.support-info, .support-form, .ticket-history { border: 1px solid #DCE3EC; border-radius: 12px; background: #fff; padding: 22px; }
+.support-info { background: #14325C; color: #fff; }
+.support-info a { display: block; color: #F36808; margin-top: 10px; font-weight: 700; }
+.support-form { display: grid; gap: 14px; }
+.support-form label, .ticket-filters { display: grid; gap: 7px; }
+.support-form input, .support-form select, .support-form textarea, .ticket-filters select { width: 100%; border: 1px solid #DCE3EC; border-radius: 7px; background: #fff; color: #14325C; padding: 10px 12px; }
+.support-form textarea { min-height: 120px; resize: vertical; }
+.support-form button { min-height: 42px; border-radius: 7px; font-weight: 800; }
+.support-feedback { padding: 10px; border-radius: 7px; background: #FFF1E7; color: #14325C; }
+.ticket-history { margin-top: 18px; }
+.ticket-filters { grid-template-columns: 1fr 220px 180px; align-items: end; }
+.ticket-filters h2 { margin: 0; }
+.ticket-list { display: grid; gap: 10px; margin-top: 16px; }
+.ticket-card { border: 1px solid #DCE3EC; border-radius: 8px; padding: 14px; }
+.ticket-card > div { display: flex; justify-content: space-between; gap: 12px; }
+.ticket-card footer { display: flex; justify-content: space-between; color: #1E467A; }
+.ticket-status { color: #F36808; }
+.status-resolved { color: #F36808; }
+.login-heading h1 { color: #14325C; }
+.login-heading > span:last-child,
+.login-form label,
+.login-mode-switch,
+.login-security-note { color: #334155; }
+.login-form input { color: #334155; }
+.login-form input::placeholder { color: #475569; opacity: 1; }
+.login-mode-switch button { color: #F36808; }
+.status-in-progress { color: #14325C; }
+@media (max-width: 720px) {
+  .topbar { height: auto; min-height: 79px; padding: 10px 16px; flex-wrap: wrap; }
+  .topbar-note { display: none; }
+  .topbar-controls { flex-wrap: wrap; }
+  .topbar-link { display: none; }
+  .brand-logo { height: 40px; }
+  .support-layout, .ticket-filters { grid-template-columns: 1fr; }
+  .ticket-filters select { width: 100%; }
+}
+
+.maintenance-deadlines-table-wrap {
+  min-width: 0;
+  margin-top: 20px;
+}
+
+.maintenance-deadlines-table-wrap h3 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.maintenance-deadlines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+
+.maintenance-deadlines-table th,
+.maintenance-deadlines-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.maintenance-deadlines-table thead th {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.maintenance-deadlines-table tbody th {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.deadline-status {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.deadline-status--on-track {
+  color: #15803D;
+  background: #DCFCE7;
+}
+
+.deadline-status--overdue,
+.deadline-status--soon {
+  color: #B91C1C;
+  background: #FEE2E2;
+}
+
+.deadline-status--untracked {
+  color: #475569;
+  background: #E2E8F0;
+}
+
+:root[data-theme='dark'] .deadline-status--on-track {
+  color: #DCFCE7;
+  background: #166534;
+}
+
+:root[data-theme='dark'] .deadline-status--overdue,
+:root[data-theme='dark'] .deadline-status--soon {
+  color: #FEE2E2;
+  background: #991B1B;
+}
+
+:root[data-theme='dark'] .deadline-status--untracked {
+  color: #CBD5E1;
+  background: #1E467A;
+}
+
+@media (max-width: 520px) {
+  .maintenance-deadlines-table {
+    font-size: 10px;
+  }
+
+  .maintenance-deadlines-table th,
+  .maintenance-deadlines-table td {
+    padding: 8px 4px;
+  }
+
+  .deadline-status {
+    padding: 4px 6px;
+  }
 }

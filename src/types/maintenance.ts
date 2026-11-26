@@ -1,7 +1,7 @@
 export type PartColorType =
   | "orange"
   | "blue"
-  | "green"
+  | "navy"
   | "red"
   | "purple"
   | "yellow"

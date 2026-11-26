@@ -7,16 +7,8 @@ import type {
 } from "../types/maintenance";
 
 const initialState: MaintenanceStateType = {
-  cars: [
-    {
-      id: "car-1",
-      model: "",
-      distance: "250",
-      frequency: "week",
-      parts: [],
-    },
-  ],
-  activeCarId: "car-1",
+  cars: [],
+  activeCarId: "",
   selectedPart: "",
   formError: "",
 };

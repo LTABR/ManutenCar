@@ -1,6 +1,7 @@
 from datetime import date
 
-from sqlalchemy import Date, Float, JSON, String, Text
+from sqlalchemy import Date, Float, ForeignKey, JSON, String, Text
+from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
@@ -44,6 +45,18 @@ class MaintenanceRecord(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     category: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     status: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+
+
+class SupportTicket(Base):
+    __tablename__ = "support_tickets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    subject: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="Open", index=True)
+    created_at: Mapped[datetime] = mapped_column(nullable=False, default=datetime.utcnow)
 
 
 def part_payload(part: Part) -> dict[str, str | date]:

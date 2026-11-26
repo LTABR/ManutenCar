@@ -19,6 +19,7 @@ export async function login(email: string, password: string) {
     body: JSON.stringify(encrypted),
   });
   setAccessToken(response.accessToken);
+  localStorage.setItem("manutencar-access-token", response.accessToken);
   return response.user;
 }
 
@@ -29,6 +30,7 @@ export async function signUp(email: string, password: string) {
     body: JSON.stringify(encrypted),
   });
   setAccessToken(response.accessToken);
+  localStorage.setItem("manutencar-access-token", response.accessToken);
   return response.user;
 }
 

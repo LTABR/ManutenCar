@@ -70,6 +70,7 @@ export function YourGarage() {
         model: "",
         distance: "250",
         frequency: "week",
+        parts: [],
       });
       dispatch(addCar(car));
     } catch (error) {

@@ -20,6 +20,11 @@ from .db import get_db
 from .models import User
 
 
+def _private_key_path() -> Path:
+    path = Path(get_settings().auth_private_key_path)
+    return path if path.is_absolute() else Path(__file__).resolve().parents[1] / path
+
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
@@ -38,7 +43,7 @@ def _decode(value: str) -> bytes:
 def decrypt_auth_payload(encrypted_key: str, iv: str, ciphertext: str) -> dict[str, str]:
     settings = get_settings()
     private_key = serialization.load_pem_private_key(
-        Path(settings.auth_private_key_path).read_bytes(), password=None
+        _private_key_path().read_bytes(), password=None
     )
     aes_key = private_key.decrypt(
         _decode(encrypted_key),
