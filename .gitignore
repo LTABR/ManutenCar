@@ -13,3 +13,7 @@ __pycache__/
 .env.local
 backend/.env
 backend/secrets/
+
+backups/
+backend/backups/
+.vscode/

@@ -6,8 +6,8 @@ This backend uses FastAPI, SQLAlchemy, and MySQL. It is compatible with the fron
 
 1. Create a MySQL database with `schema.sql` (or let the development startup hook create the tables).
 2. Create a virtual environment and install `requirements.txt`.
-3. Copy `.env.example` to `.env` and set `DATABASE_URL`, `JWT_SECRET`, and `AUTH_PRIVATE_KEY_PATH`.
-4. Generate an RSA key pair (`openssl genpkey -algorithm RSA -out backend/secrets/auth-private-key.pem -pkeyopt rsa_keygen_bits:2048` and `openssl rsa -pubout -in backend/secrets/auth-private-key.pem -out backend/secrets/auth-public-key.pem`). Keep the private key only on the backend, and put the public PEM in the frontend's `VITE_AUTH_PUBLIC_KEY`.
+3. Copy `.env.example` to `.env` and set `DATABASE_URL` and a strong `JWT_SECRET`.
+4. If needed, from `backend/`, generate an RSA key pair with `mkdir -p secrets && openssl genpkey -algorithm RSA -out secrets/auth-private-key.pem -pkeyopt rsa_keygen_bits:2048 && openssl pkey -in secrets/auth-private-key.pem -pubout -out secrets/auth-public-key.pem`. Set `AUTH_PRIVATE_KEY_PATH=./secrets/auth-private-key.pem` in `backend/.env`, and set the matching public PEM in the root `.env` as `VITE_AUTH_PUBLIC_KEY` (use literal `\n` between PEM lines). Never expose or commit the private key. The backend loads its `.env` and resolves the relative private-key path from the backend directory, including when started with `--app-dir backend` from the repository root.
 5. Create a user: `python backend/scripts/create_user.py you@example.com 'a-long-password'`.
 6. Run: `uvicorn app.main:app --app-dir backend --reload`.
 

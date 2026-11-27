@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "../components/Icon";
 import { LookingAhead } from "../components/LookingAhead";
 import type { ScheduledItemType } from "../components/LookingAhead";
 import { SectionKicker } from "../components/styles/sharedStyles";
 import { YourGarage } from "../components/YourGarage";
+import { VehicleMaintenanceDetails } from "../components/VehicleMaintenanceDetails";
 import { catalog } from "../data/parts";
 import { useAppSelector } from "../store/hooks";
 import { useAppDispatch } from "../store/hooks";
@@ -14,6 +15,8 @@ import { usePreferences } from "../preferences";
 import { isLocaleType, localeOptions, useTranslation } from "../langsDict";
 import { useAuth } from "../auth";
 import { Login } from "./Login";
+import { Support } from "./Support";
+import { readStoredValue, writeStoredValue } from "../storage";
 // @ts-ignore CSS side-effect imports are handled by the bundler.
 import "./styles/App.css";
 
@@ -40,30 +43,32 @@ function calendarDaysFromNow(date: Date) {
 }
 
 function App() {
+  const { user, loading, logout } = useAuth();
   const cars = useAppSelector((state) => state.maintenance.cars);
+  const activeCarId = useAppSelector((state) => state.maintenance.activeCarId);
   const dispatch = useAppDispatch();
   const { theme, setTheme, locale, setLocale } = usePreferences();
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const [activeView, setActiveView] = useState<"garage" | "support">(() => readStoredValue("activeView", "garage"));
+  useEffect(() => writeStoredValue("activeView", activeView), [activeView]);
 
   useEffect(() => {
-    if (!user) {
-      dispatch(replaceCars([]));
-      return;
-    }
-    let cancelled = false;
+    if (!user) return;
+    let active = true;
     garageApi
       .listCars()
       .then((loadedCars) => {
-        if (!cancelled) dispatch(replaceCars(loadedCars));
+        if (active) {
+          dispatch(replaceCars(loadedCars));
+        }
       })
       .catch(() => {
-        // Keep the local planner usable while an API is being configured.
+        // Mantém estado local caso a API falhe
       });
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, [dispatch, user]);
+  }, [user, dispatch]);
 
   const scheduled = useMemo<ScheduledItemType[]>(
     () =>
@@ -117,18 +122,34 @@ function App() {
     [cars],
   );
 
-  if (!user) return <Login />;
+  const activeCar = useMemo(
+    () => cars.find((car) => car.id === activeCarId) ?? cars[0] ?? null,
+    [cars, activeCarId],
+  );
+
+  const activeCarName = activeCar ? activeCar.model : "";
+
+  const activeSchedule = useMemo(
+    () =>
+      activeCar
+        ? scheduled.filter((item) => item.carId === activeCar.id)
+        : [],
+    [scheduled, activeCar],
+  );
+
+  if (loading) {
+    return null;
+  }
+
+  if (!user) {
+    return <Login />;
+  }
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <a className="brand" href="#" aria-label={t("home")}>
-          <span className="brand-mark">
-            <Icon name="wrench" size={19} />
-          </span>
-          <span>
-            ManutenCar<span className="brand-period">.</span>
-          </span>
+          <img className="brand-logo" src="/logo_ManutenCar.jpeg" alt="ManutenCar" />
         </a>
         <div className="topbar-note">
           <span className="live-dot" /> {t("personalPlanner")}
@@ -162,6 +183,9 @@ function App() {
           <a className="topbar-link" href="#how-it-works">
             {t("howItWorks")} <Icon name="arrow" size={15} />
           </a>
+          <button className={`support-nav-button ${activeView === "support" ? "active" : ""}`} type="button" onClick={() => setActiveView(activeView === "support" ? "garage" : "support")}>
+            Support
+          </button>
           <button className="logout-button" type="button" onClick={logout}>
             <span>{user.name}</span><Icon name="logout" size={15} />
           </button>
@@ -169,6 +193,8 @@ function App() {
       </header>
 
       <main>
+        {activeView === "support" ? <Support /> : (
+        <>
         <section className="hero">
           <div className="hero-copy">
             <div className="eyebrow">
@@ -215,6 +241,14 @@ function App() {
           <LookingAhead scheduled={scheduled} />
         </section>
 
+        {activeCar && (
+          <VehicleMaintenanceDetails
+            vehicleId={activeCar.id}
+            vehicleName={activeCarName}
+            scheduled={activeSchedule}
+          />
+        )}
+
         <section className="how-section" id="how-it-works">
           <div>
             <SectionKicker>
@@ -224,6 +258,8 @@ function App() {
           </div>
           <p>{t("howDescription")}</p>
         </section>
+        </>
+        )}
       </main>
       <footer className="page-footer">
         <span>

@@ -49,8 +49,7 @@ export function Login() {
     <main className="login-page">
       <section className="login-panel" aria-labelledby="login-title">
         <a className="brand login-brand" href="#" aria-label="ManutenCar home">
-          <span className="brand-mark"><Icon name="wrench" size={19} /></span>
-          <span>ManutenCar<span className="brand-period">.</span></span>
+          <img className="login-logo" src="/logo_ManutenCar.jpeg" alt="ManutenCar" />
         </a>
         <div className="login-heading">
           <span className="login-security-icon"><Icon name="lock" size={20} /></span>

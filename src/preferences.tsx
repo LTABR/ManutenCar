@@ -29,7 +29,7 @@ function storedLocale(): LocaleType {
 }
 
 function storedTheme(): ThemeType {
-  return localStorage.getItem("manutencar-theme") === "light" ? "light" : "dark";
+  return localStorage.getItem("manutencar-theme") === "dark" ? "dark" : "light";
 }
 
 export function PreferencesProvider({ children }: PropsWithChildren) {
@@ -53,7 +53,7 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute(
       "content",
-      theme === "dark" ? "#151b18" : "#f5f6f2",
+      theme === "dark" ? "#14325C" : "#F4F6F9",
     );
   }, [theme]);
 

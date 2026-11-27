@@ -12,6 +12,7 @@ export type IconNameType =
   | "chevron"
   | "sun"
   | "moon"
+  | "search"
   | "lock"
   | "logout";
 
@@ -70,16 +71,22 @@ export function Icon({
       </>
     ),
     moon: <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />,
+    search: (
+      <>
+        <circle cx="11" cy="11" r="6" />
+        <path d="m16 16 4 4" />
+      </>
+    ),
     lock: (
       <>
-        <rect x="4" y="10" width="16" height="11" rx="2" />
+        <rect x="5" y="10" width="14" height="10" rx="2" />
         <path d="M8 10V7a4 4 0 0 1 8 0v3" />
       </>
     ),
     logout: (
       <>
-        <path d="M10 17l5-5-5-5m5 5H3" />
-        <path d="M21 19V5a2 2 0 0 0-2-2h-5" />
+        <path d="M10 5H5v14h5" />
+        <path d="M14 8l4 4-4 4m4-4H8" />
       </>
     ),
   };

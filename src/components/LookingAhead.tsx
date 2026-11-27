@@ -158,7 +158,7 @@ export function LookingAhead({ scheduled }: LookingAheadPropTypes) {
               </small>
             </span>
             <span
-              className={`summary-badge ${dueSoonCount === 0 ? "badge-green" : "badge-amber"}`}
+              className={`summary-badge ${dueSoonCount === 0 ? "badge-clear" : "badge-amber"}`}
             >
               {dueSoonCount === 0 ? t("onTrack") : t("upNext")}
             </span>
