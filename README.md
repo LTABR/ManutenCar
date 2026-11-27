@@ -109,9 +109,9 @@ Requisitos: Python v3.10 ou superior, Node.js v18 ou superior e MySQL Server
    python -m venv .venv
    
    # No Linux/macOS:
-   source venv/bin/activate
+   source .venv/Scripts/activate
    # No Windows:
-   # venv\Scripts\activate
+   # .venv\Scripts\activate
 
    pip install -r requirements.txt
    cp .env.example .env

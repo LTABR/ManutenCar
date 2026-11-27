@@ -2,13 +2,13 @@ from datetime import date, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.app.db import Base, get_db
 from backend.app.main import app
-from backend.app.models import Car, Part, User
+from backend.app.models import Car, MaintenanceRecord, Part, User
 from backend.app.security import get_current_user
 
 
@@ -18,6 +18,11 @@ def client():
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
+    )
+    event.listen(
+        test_engine,
+        "connect",
+        lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"),
     )
     testing_session = sessionmaker(bind=test_engine, autoflush=False, expire_on_commit=False)
     Base.metadata.create_all(test_engine)
@@ -114,3 +119,24 @@ def test_python_deadline_rules_identify_overdue_and_current_components(client):
     statuses = {item["part_id"]: item["status"] for item in response.json()}
     assert statuses["engine-oil"] == "overdue"
     assert statuses["spark-plugs"] == "on-track"
+
+
+def test_add_part_persists_car_foreign_key_and_maintenance_record(client):
+    client, testing_session = client
+
+    response = client.post(
+        "/api/cars/car-owned/parts",
+        json={"partId": "engine-oil", "lastServiced": date.today().isoformat()},
+    )
+
+    assert response.status_code == 201
+    part_id = response.json()["id"]
+    with testing_session() as db:
+        part = db.get(Part, part_id)
+        record = db.scalar(
+            select(MaintenanceRecord).where(MaintenanceRecord.part_id == part_id)
+        )
+
+    assert part.car_id == "car-owned"
+    assert record.vehicle_id == "car-owned"
+    assert record.part_id == part_id

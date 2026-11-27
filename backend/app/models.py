@@ -26,6 +26,10 @@ class Part(Base):
     id: Mapped[str] = mapped_column(CHAR(36), primary_key=True)
     last_maintenance: Mapped[date] = mapped_column(Date, nullable=False)
     part_type_id: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    car_id: Mapped[str | None] = mapped_column(
+        CHAR(36), ForeignKey("cars.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=True, index=True,
+    )
 
 
 class MaintenanceRecord(Base):

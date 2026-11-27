@@ -307,9 +307,11 @@ def add_part(car_id: str, payload: PartCreate, user: User = Depends(get_current_
         id=str(uuid4()),
         part_type_id=part_type_id,
         last_maintenance=payload.maintenance_date(),
+        car_id=car.id,
     )
     db.add(part)
     car.parts_ids = [*(car.parts_ids or []), part.id]
+    db.flush()
     db.add(
         MaintenanceRecord(
             id=str(uuid4()),

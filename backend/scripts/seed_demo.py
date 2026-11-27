@@ -76,6 +76,7 @@ def seed() -> tuple[int, int]:
                         id=str(uuid4()),
                         part_type_id=part_type_id,
                         last_maintenance=today - timedelta(days=age_days),
+                        car_id=car.id,
                     )
                     db.add(part)
                     db.flush()
